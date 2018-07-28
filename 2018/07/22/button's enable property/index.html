@@ -79,17 +79,17 @@
 
 
 
-<meta name="description" content="button’s enable property首先看一段代码： 123button.enable = NO;	[self mock] `// here do something time-consuming synchronous`button.enable = YEs; 很明显，这段代码的意图在与防抖。在耗时任务前关闭按钮的可点击状态，然后进行耗时任务，任务结束之后再打开。但是测试结果发现，e">
+<meta name="description" content="首先看一段代码： 123button.enable = NO;	[self mock] `// here do something time-consuming synchronous`button.enable = YES; 很明显，这段代码的意图在与防抖。在耗时任务前关闭按钮的可点击状态，然后进行耗时任务，任务结束之后再打开。但是测试结果发现，enable属性并没有生效。 先谈谈runloop">
 <meta property="og:type" content="article">
-<meta property="og:title" content="一只代码狗的随笔">
+<meta property="og:title" content="button&#39;s enable property">
 <meta property="og:url" content="http://yoursite.com/2018/07/22/button's enable property/index.html">
 <meta property="og:site_name" content="一只代码狗的随笔">
-<meta property="og:description" content="button’s enable property首先看一段代码： 123button.enable = NO;	[self mock] `// here do something time-consuming synchronous`button.enable = YEs; 很明显，这段代码的意图在与防抖。在耗时任务前关闭按钮的可点击状态，然后进行耗时任务，任务结束之后再打开。但是测试结果发现，e">
+<meta property="og:description" content="首先看一段代码： 123button.enable = NO;	[self mock] `// here do something time-consuming synchronous`button.enable = YES; 很明显，这段代码的意图在与防抖。在耗时任务前关闭按钮的可点击状态，然后进行耗时任务，任务结束之后再打开。但是测试结果发现，enable属性并没有生效。 先谈谈runloop">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-07-22T15:05:45.417Z">
+<meta property="og:updated_time" content="2018-07-28T06:03:30.138Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="一只代码狗的随笔">
-<meta name="twitter:description" content="button’s enable property首先看一段代码： 123button.enable = NO;	[self mock] `// here do something time-consuming synchronous`button.enable = YEs; 很明显，这段代码的意图在与防抖。在耗时任务前关闭按钮的可点击状态，然后进行耗时任务，任务结束之后再打开。但是测试结果发现，e">
+<meta name="twitter:title" content="button&#39;s enable property">
+<meta name="twitter:description" content="首先看一段代码： 123button.enable = NO;	[self mock] `// here do something time-consuming synchronous`button.enable = YES; 很明显，这段代码的意图在与防抖。在耗时任务前关闭按钮的可点击状态，然后进行耗时任务，任务结束之后再打开。但是测试结果发现，enable属性并没有生效。 先谈谈runloop">
 
 
 
@@ -125,7 +125,7 @@
 
 
 
-  <title> | 一只代码狗的随笔</title>
+  <title>button's enable property | 一只代码狗的随笔</title>
   
 
 
@@ -249,7 +249,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline"></h1>
+          <h1 class="post-title" itemprop="name headline">button's enable property</h1>
         
 
         <div class="post-meta">
@@ -299,16 +299,13 @@
       
 
       
-        <h1 id="button’s-enable-property"><a href="#button’s-enable-property" class="headerlink" title="button’s enable property"></a>button’s enable property</h1><pre><code>首先看一段代码：
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">button.enable = NO;</span><br><span class="line">	[self mock] `// here do something time-consuming synchronous`</span><br><span class="line">button.enable = YEs;</span><br></pre></td></tr></table></figure>
-<pre><code>很明显，这段代码的意图在与防抖。在耗时任务前关闭按钮的可点击状态，然后进行耗时任务，任务结束之后再打开。但是测试结果发现，enable属性并没有生效。
-
-先谈谈runloop，runloop是iOS应用可以响应的根本。线程执行完任务之后便会结束线程的周期。但，主线程不会，主线一直在工作。回归主题，讲讲页面是如何显示的。页面元素的信息并不是每次在线程执行完修改页面的代码后立刻生效。当runloop一圈走完后，runloop会将图层树上的所有修改打包提交到渲染中心，最后显示的屏幕上。事件的响应也如此，在runloop没有提交enable属性的修改前，按钮一直是可点击状态。
-
-对于以上防抖的处理，则需要先将enable属性的修改提交上去。当然将耗时任务放到异步线程中处理是个不错的选择。
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">button.enable = NO;</span><br><span class="line">    dispatch_async(dispatch_get_global_queue(0,0), ^&#123;</span><br><span class="line">       // do timing-consuming work here</span><br><span class="line">       dispatch_async(dispatch_main(), ^&#123;</span><br><span class="line">       	button.enable = YES;</span><br><span class="line">   	&#125;);</span><br><span class="line">   &#125;);</span><br></pre></td></tr></table></figure>
-<pre><code>或者，有另一种方案，我们需要确保enable属性先提交，然后下一次loop中处理耗时任务。我们可以延时调用来处理任务。
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">button.enable = NO;</span><br><span class="line">dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.25f, dispatch_get_main_queue(), ^&#123;</span><br><span class="line">	// do timing-consuming work here</span><br><span class="line">	button.enable = YES;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+        <p>首先看一段代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">button.enable = NO;</span><br><span class="line">	[self mock] `// here do something time-consuming synchronous`</span><br><span class="line">button.enable = YES;</span><br></pre></td></tr></table></figure>
+<p>很明显，这段代码的意图在与防抖。在耗时任务前关闭按钮的可点击状态，然后进行耗时任务，任务结束之后再打开。但是测试结果发现，enable属性并没有生效。</p>
+<p>先谈谈runloop，runloop是iOS应用可以响应的根本。线程执行完任务之后便会结束线程的周期。但，主线程不会，主线一直在工作。回归主题，讲讲页面是如何显示的。页面元素的信息并不是每次在线程执行完修改页面的代码后立刻生效。当runloop一圈走完后，runloop会将图层树上的所有修改打包提交到渲染中心，最后显示的屏幕上。事件的响应也如此，在runloop没有提交enable属性的修改前，按钮一直是可点击状态。</p>
+<p>对于以上防抖的处理，则需要先将enable属性的修改提交上去。当然将耗时任务放到异步线程中处理是个不错的选择。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">button.enable = NO;</span><br><span class="line">    dispatch_async(dispatch_get_global_queue(0,0), ^&#123;</span><br><span class="line">       // do timing-consuming work here</span><br><span class="line">       dispatch_async(dispatch_main(), ^&#123;</span><br><span class="line">       	button.enable = YES;</span><br><span class="line">   	&#125;);</span><br><span class="line">   &#125;);</span><br></pre></td></tr></table></figure></p>
+<p>或者，有另一种方案，我们需要确保enable属性先提交，然后下一次loop中处理耗时任务。我们可以延时调用来处理任务。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">button.enable = NO;</span><br><span class="line">dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.25f, dispatch_get_main_queue(), ^&#123;</span><br><span class="line">	// do timing-consuming work here</span><br><span class="line">	button.enable = YES;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
       
     </div>
@@ -333,8 +330,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/07/14/viewController_loadView/" rel="next" title="">
-                <i class="fa fa-chevron-left"></i> 
+              <a href="/2018/07/14/viewController_loadView/" rel="next" title="viewController未出现前强制加载View">
+                <i class="fa fa-chevron-left"></i> viewController未出现前强制加载View
               </a>
             
           </div>
@@ -343,8 +340,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/07/28/autorelease简介/" rel="prev" title="">
-                 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/07/28/autorelease简介/" rel="prev" title="关于Autorelease和内存管理">
+                关于Autorelease和内存管理 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -397,17 +394,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Table of Contents
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Overview
-          </li>
-        </ul>
-      
 
-      <section class="site-overview-wrap sidebar-panel">
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -449,22 +437,6 @@
         </div>
       </section>
 
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#button’s-enable-property"><span class="nav-number">1.</span> <span class="nav-text">button’s enable property</span></a></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
       
 
       

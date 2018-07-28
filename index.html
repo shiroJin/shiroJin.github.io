@@ -251,7 +251,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/07/28/autorelease简介/" itemprop="url">Untitled</a></h1>
+                <a class="post-title-link" href="/2018/07/28/autorelease简介/" itemprop="url">关于Autorelease和内存管理</a></h1>
         
 
         <div class="post-meta">
@@ -303,12 +303,13 @@
       
         
           
-            <h2 id="关于Autorelease和内存管理"><a href="#关于Autorelease和内存管理" class="headerlink" title="关于Autorelease和内存管理"></a>关于Autorelease和内存管理</h2><h3 id="引用计数"><a href="#引用计数" class="headerlink" title="引用计数"></a>引用计数</h3><p>​    对于用alloc/new/copy/mutableCopy方法生成并持有，或者retain都会使对象的引用计数加1，当引用计数为0时，对象会被销毁。MRC时代，对象的引用计数需要自己管理。创建一个对象后需要自己去释放，内存管理相当的繁琐，但对内存的控制会更有主动权，内存管理的理解更好。此外，对于一个对象如果调用了多次releasse会导致崩溃，崩溃的原因是对象已经被销毁，造成了野指针访问。ARC时代来临后，对象何时去释放，越来越变得模糊。</p>
+            <h3 id="引用计数"><a href="#引用计数" class="headerlink" title="引用计数"></a>引用计数</h3><p>​    对于用alloc/new/copy/mutableCopy方法生成并持有，或者retain都会使对象的引用计数加1，当引用计数为0时，对象会被销毁。MRC时代，对象的引用计数需要自己管理。创建一个对象后需要自己去释放，内存管理相当的繁琐，但对内存的控制会更有主动权，内存管理的理解更好。此外，对于一个对象如果调用了多次releasse会导致崩溃，崩溃的原因是对象已经被销毁，造成了野指针访问。ARC时代来临后，对象何时去释放，越来越变得模糊。</p>
 <p>​    系统采用散列表（引用计数表）管理引用计数。1.对象用内存块的分配无需考虑内存块头部。2.引用计数表各记录中存有内存块地址，可从各个记录追溯到各对象的内存块。</p>
 <h3 id="自动释放池"><a href="#自动释放池" class="headerlink" title="自动释放池"></a>自动释放池</h3><p>​    autorelease就是自动释放。是MRC时代的产物，它更类似于局部变量（自动变量），在变量超出作用域的时候自动废弃。但autorelease不会在超出作用域后<em>立刻</em>自动release。autorelease的对象会注册到autoreleasepool中，当autoreleasepool清理（drain)的时候将所有releasepool中的对象逐一release一次。</p>
 <p>​    一个iOS进程中系统会自动创建pool，在主线程runloop每次循环过程中都会废弃旧的pool，并创建新的。可知autorelease的对象并不是立刻销毁的，而是等到注册到的releasepool销毁的时候才能被销毁。</p>
 <h3 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h3><p>​    如果主线的在同步执行耗时任务时，releasepool就会堆积大量没有及时释放的对象，导致内存不足的情况。此情况需要自己添加autoreleasepool。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">for (int i = 0; i &lt; 10000000; i++) &#123;</span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">        /*</span><br><span class="line">         * 生成对象</span><br><span class="line">         */</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
           
         
       
@@ -375,7 +376,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/07/22/button's enable property/" itemprop="url">Untitled</a></h1>
+                <a class="post-title-link" href="/2018/07/22/button's enable property/" itemprop="url">button's enable property</a></h1>
         
 
         <div class="post-meta">
@@ -427,16 +428,13 @@
       
         
           
-            <h1 id="button’s-enable-property"><a href="#button’s-enable-property" class="headerlink" title="button’s enable property"></a>button’s enable property</h1><pre><code>首先看一段代码：
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">button.enable = NO;</span><br><span class="line">	[self mock] `// here do something time-consuming synchronous`</span><br><span class="line">button.enable = YEs;</span><br></pre></td></tr></table></figure>
-<pre><code>很明显，这段代码的意图在与防抖。在耗时任务前关闭按钮的可点击状态，然后进行耗时任务，任务结束之后再打开。但是测试结果发现，enable属性并没有生效。
-
-先谈谈runloop，runloop是iOS应用可以响应的根本。线程执行完任务之后便会结束线程的周期。但，主线程不会，主线一直在工作。回归主题，讲讲页面是如何显示的。页面元素的信息并不是每次在线程执行完修改页面的代码后立刻生效。当runloop一圈走完后，runloop会将图层树上的所有修改打包提交到渲染中心，最后显示的屏幕上。事件的响应也如此，在runloop没有提交enable属性的修改前，按钮一直是可点击状态。
-
-对于以上防抖的处理，则需要先将enable属性的修改提交上去。当然将耗时任务放到异步线程中处理是个不错的选择。
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">button.enable = NO;</span><br><span class="line">    dispatch_async(dispatch_get_global_queue(0,0), ^&#123;</span><br><span class="line">       // do timing-consuming work here</span><br><span class="line">       dispatch_async(dispatch_main(), ^&#123;</span><br><span class="line">       	button.enable = YES;</span><br><span class="line">   	&#125;);</span><br><span class="line">   &#125;);</span><br></pre></td></tr></table></figure>
-<pre><code>或者，有另一种方案，我们需要确保enable属性先提交，然后下一次loop中处理耗时任务。我们可以延时调用来处理任务。
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">button.enable = NO;</span><br><span class="line">dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.25f, dispatch_get_main_queue(), ^&#123;</span><br><span class="line">	// do timing-consuming work here</span><br><span class="line">	button.enable = YES;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+            <p>首先看一段代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">button.enable = NO;</span><br><span class="line">	[self mock] `// here do something time-consuming synchronous`</span><br><span class="line">button.enable = YES;</span><br></pre></td></tr></table></figure>
+<p>很明显，这段代码的意图在与防抖。在耗时任务前关闭按钮的可点击状态，然后进行耗时任务，任务结束之后再打开。但是测试结果发现，enable属性并没有生效。</p>
+<p>先谈谈runloop，runloop是iOS应用可以响应的根本。线程执行完任务之后便会结束线程的周期。但，主线程不会，主线一直在工作。回归主题，讲讲页面是如何显示的。页面元素的信息并不是每次在线程执行完修改页面的代码后立刻生效。当runloop一圈走完后，runloop会将图层树上的所有修改打包提交到渲染中心，最后显示的屏幕上。事件的响应也如此，在runloop没有提交enable属性的修改前，按钮一直是可点击状态。</p>
+<p>对于以上防抖的处理，则需要先将enable属性的修改提交上去。当然将耗时任务放到异步线程中处理是个不错的选择。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">button.enable = NO;</span><br><span class="line">    dispatch_async(dispatch_get_global_queue(0,0), ^&#123;</span><br><span class="line">       // do timing-consuming work here</span><br><span class="line">       dispatch_async(dispatch_main(), ^&#123;</span><br><span class="line">       	button.enable = YES;</span><br><span class="line">   	&#125;);</span><br><span class="line">   &#125;);</span><br></pre></td></tr></table></figure></p>
+<p>或者，有另一种方案，我们需要确保enable属性先提交，然后下一次loop中处理耗时任务。我们可以延时调用来处理任务。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">button.enable = NO;</span><br><span class="line">dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.25f, dispatch_get_main_queue(), ^&#123;</span><br><span class="line">	// do timing-consuming work here</span><br><span class="line">	button.enable = YES;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
           
         
@@ -504,7 +502,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/07/14/viewController_loadView/" itemprop="url">Untitled</a></h1>
+                <a class="post-title-link" href="/2018/07/14/viewController_loadView/" itemprop="url">viewController未出现前强制加载View</a></h1>
         
 
         <div class="post-meta">
@@ -556,9 +554,8 @@
       
         
           
-            <h2 id="viewController未出现前强制加载View"><a href="#viewController未出现前强制加载View" class="headerlink" title="viewController未出现前强制加载View"></a>viewController未出现前强制加载View</h2><p>1.viewcontroller的生命周期</p>
-<p>loadView -&gt; viewDidLoaded -&gt; viewWillAppear<br>有没有覆写loadView方法；<br>xib加载</p>
-<p>2.实例<br>viewController还没加载出来，对视图上的UI元素进行了操作，这时候因为loadView, viewDidLoaded没有被调用，UI控件还没被初始化，<br>此时外部的方法调用对UI元素并没有任何作用。所以需要显式的调用loadView方法，loadView方法一般viewController自己隐式的调用，<br>而且只调用一次。所以这里可以通过访问viewController.view来强制viewController去调用loadView，viewDidLoaded方法。</p>
+            <h2 id="1-viewcontroller的生命周期"><a href="#1-viewcontroller的生命周期" class="headerlink" title="1.viewcontroller的生命周期"></a>1.viewcontroller的生命周期</h2><p>loadView -&gt; viewDidLoaded -&gt; viewWillAppear<br>有没有覆写loadView方法；<br>xib加载</p>
+<h2 id="2-实例"><a href="#2-实例" class="headerlink" title="2.实例"></a>2.实例</h2><p>viewController还没加载出来，对视图上的UI元素进行了操作，这时候因为loadView, viewDidLoaded没有被调用，UI控件还没被初始化，<br>此时外部的方法调用对UI元素并没有任何作用。所以需要显式的调用loadView方法，loadView方法一般viewController自己隐式的调用，<br>而且只调用一次。所以这里可以通过访问viewController.view来强制viewController去调用loadView，viewDidLoaded方法。</p>
 
           
         

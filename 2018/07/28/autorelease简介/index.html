@@ -79,17 +79,17 @@
 
 
 
-<meta name="description" content="关于Autorelease和内存管理引用计数​    对于用alloc/new/copy/mutableCopy方法生成并持有，或者retain都会使对象的引用计数加1，当引用计数为0时，对象会被销毁。MRC时代，对象的引用计数需要自己管理。创建一个对象后需要自己去释放，内存管理相当的繁琐，但对内存的控制会更有主动权，内存管理的理解更好。此外，对于一个对象如果调用了多次releasse会导致崩溃，">
+<meta name="description" content="引用计数​    对于用alloc/new/copy/mutableCopy方法生成并持有，或者retain都会使对象的引用计数加1，当引用计数为0时，对象会被销毁。MRC时代，对象的引用计数需要自己管理。创建一个对象后需要自己去释放，内存管理相当的繁琐，但对内存的控制会更有主动权，内存管理的理解更好。此外，对于一个对象如果调用了多次releasse会导致崩溃，崩溃的原因是对象已经被销毁，造成了野">
 <meta property="og:type" content="article">
-<meta property="og:title" content="一只代码狗的随笔">
+<meta property="og:title" content="关于Autorelease和内存管理">
 <meta property="og:url" content="http://yoursite.com/2018/07/28/autorelease简介/index.html">
 <meta property="og:site_name" content="一只代码狗的随笔">
-<meta property="og:description" content="关于Autorelease和内存管理引用计数​    对于用alloc/new/copy/mutableCopy方法生成并持有，或者retain都会使对象的引用计数加1，当引用计数为0时，对象会被销毁。MRC时代，对象的引用计数需要自己管理。创建一个对象后需要自己去释放，内存管理相当的繁琐，但对内存的控制会更有主动权，内存管理的理解更好。此外，对于一个对象如果调用了多次releasse会导致崩溃，">
+<meta property="og:description" content="引用计数​    对于用alloc/new/copy/mutableCopy方法生成并持有，或者retain都会使对象的引用计数加1，当引用计数为0时，对象会被销毁。MRC时代，对象的引用计数需要自己管理。创建一个对象后需要自己去释放，内存管理相当的繁琐，但对内存的控制会更有主动权，内存管理的理解更好。此外，对于一个对象如果调用了多次releasse会导致崩溃，崩溃的原因是对象已经被销毁，造成了野">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-07-28T05:45:05.700Z">
+<meta property="og:updated_time" content="2018-07-28T05:59:37.742Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="一只代码狗的随笔">
-<meta name="twitter:description" content="关于Autorelease和内存管理引用计数​    对于用alloc/new/copy/mutableCopy方法生成并持有，或者retain都会使对象的引用计数加1，当引用计数为0时，对象会被销毁。MRC时代，对象的引用计数需要自己管理。创建一个对象后需要自己去释放，内存管理相当的繁琐，但对内存的控制会更有主动权，内存管理的理解更好。此外，对于一个对象如果调用了多次releasse会导致崩溃，">
+<meta name="twitter:title" content="关于Autorelease和内存管理">
+<meta name="twitter:description" content="引用计数​    对于用alloc/new/copy/mutableCopy方法生成并持有，或者retain都会使对象的引用计数加1，当引用计数为0时，对象会被销毁。MRC时代，对象的引用计数需要自己管理。创建一个对象后需要自己去释放，内存管理相当的繁琐，但对内存的控制会更有主动权，内存管理的理解更好。此外，对于一个对象如果调用了多次releasse会导致崩溃，崩溃的原因是对象已经被销毁，造成了野">
 
 
 
@@ -125,7 +125,7 @@
 
 
 
-  <title> | 一只代码狗的随笔</title>
+  <title>关于Autorelease和内存管理 | 一只代码狗的随笔</title>
   
 
 
@@ -249,7 +249,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline"></h1>
+          <h1 class="post-title" itemprop="name headline">关于Autorelease和内存管理</h1>
         
 
         <div class="post-meta">
@@ -299,12 +299,13 @@
       
 
       
-        <h2 id="关于Autorelease和内存管理"><a href="#关于Autorelease和内存管理" class="headerlink" title="关于Autorelease和内存管理"></a>关于Autorelease和内存管理</h2><h3 id="引用计数"><a href="#引用计数" class="headerlink" title="引用计数"></a>引用计数</h3><p>​    对于用alloc/new/copy/mutableCopy方法生成并持有，或者retain都会使对象的引用计数加1，当引用计数为0时，对象会被销毁。MRC时代，对象的引用计数需要自己管理。创建一个对象后需要自己去释放，内存管理相当的繁琐，但对内存的控制会更有主动权，内存管理的理解更好。此外，对于一个对象如果调用了多次releasse会导致崩溃，崩溃的原因是对象已经被销毁，造成了野指针访问。ARC时代来临后，对象何时去释放，越来越变得模糊。</p>
+        <h3 id="引用计数"><a href="#引用计数" class="headerlink" title="引用计数"></a>引用计数</h3><p>​    对于用alloc/new/copy/mutableCopy方法生成并持有，或者retain都会使对象的引用计数加1，当引用计数为0时，对象会被销毁。MRC时代，对象的引用计数需要自己管理。创建一个对象后需要自己去释放，内存管理相当的繁琐，但对内存的控制会更有主动权，内存管理的理解更好。此外，对于一个对象如果调用了多次releasse会导致崩溃，崩溃的原因是对象已经被销毁，造成了野指针访问。ARC时代来临后，对象何时去释放，越来越变得模糊。</p>
 <p>​    系统采用散列表（引用计数表）管理引用计数。1.对象用内存块的分配无需考虑内存块头部。2.引用计数表各记录中存有内存块地址，可从各个记录追溯到各对象的内存块。</p>
 <h3 id="自动释放池"><a href="#自动释放池" class="headerlink" title="自动释放池"></a>自动释放池</h3><p>​    autorelease就是自动释放。是MRC时代的产物，它更类似于局部变量（自动变量），在变量超出作用域的时候自动废弃。但autorelease不会在超出作用域后<em>立刻</em>自动release。autorelease的对象会注册到autoreleasepool中，当autoreleasepool清理（drain)的时候将所有releasepool中的对象逐一release一次。</p>
 <p>​    一个iOS进程中系统会自动创建pool，在主线程runloop每次循环过程中都会废弃旧的pool，并创建新的。可知autorelease的对象并不是立刻销毁的，而是等到注册到的releasepool销毁的时候才能被销毁。</p>
 <h3 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h3><p>​    如果主线的在同步执行耗时任务时，releasepool就会堆积大量没有及时释放的对象，导致内存不足的情况。此情况需要自己添加autoreleasepool。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">for (int i = 0; i &lt; 10000000; i++) &#123;</span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">        /*</span><br><span class="line">         * 生成对象</span><br><span class="line">         */</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
       
     </div>
     
@@ -328,8 +329,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/07/22/button's enable property/" rel="next" title="">
-                <i class="fa fa-chevron-left"></i> 
+              <a href="/2018/07/22/button's enable property/" rel="next" title="button's enable property">
+                <i class="fa fa-chevron-left"></i> button's enable property
               </a>
             
           </div>
@@ -450,7 +451,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#关于Autorelease和内存管理"><span class="nav-number">1.</span> <span class="nav-text">关于Autorelease和内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#引用计数"><span class="nav-number">1.1.</span> <span class="nav-text">引用计数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自动释放池"><span class="nav-number">1.2.</span> <span class="nav-text">自动释放池</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#应用"><span class="nav-number">1.3.</span> <span class="nav-text">应用</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#引用计数"><span class="nav-number">1.</span> <span class="nav-text">引用计数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自动释放池"><span class="nav-number">2.</span> <span class="nav-text">自动释放池</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#应用"><span class="nav-number">3.</span> <span class="nav-text">应用</span></a></li></ol></div>
             
 
           </div>
