@@ -79,17 +79,17 @@
 
 
 
-<meta name="description" content="引用计数​    对于用alloc/new/copy/mutableCopy方法生成并持有，或者retain都会使对象的引用计数加1，当引用计数为0时，对象会被销毁。MRC时代，对象的引用计数需要自己管理。创建一个对象后需要自己去释放，内存管理相当的繁琐，但对内存的控制会更有主动权，内存管理的理解更好。此外，对于一个对象如果调用了多次releasse会导致崩溃，崩溃的原因是对象已经被销毁，造成了野">
+<meta name="description" content="​    MRC时代，对象的引用计数需要自己管理。创建一个对象后需要自己去释放，内存管理相当的繁琐，但对内存的控制会更有主动权，内存管理的理解更好。ARC时代来临后，对象何时去释放，越来越变得模糊。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="关于Autorelease和内存管理">
 <meta property="og:url" content="http://yoursite.com/2018/07/28/autorelease简介/index.html">
 <meta property="og:site_name" content="一只代码狗的随笔">
-<meta property="og:description" content="引用计数​    对于用alloc/new/copy/mutableCopy方法生成并持有，或者retain都会使对象的引用计数加1，当引用计数为0时，对象会被销毁。MRC时代，对象的引用计数需要自己管理。创建一个对象后需要自己去释放，内存管理相当的繁琐，但对内存的控制会更有主动权，内存管理的理解更好。此外，对于一个对象如果调用了多次releasse会导致崩溃，崩溃的原因是对象已经被销毁，造成了野">
+<meta property="og:description" content="​    MRC时代，对象的引用计数需要自己管理。创建一个对象后需要自己去释放，内存管理相当的繁琐，但对内存的控制会更有主动权，内存管理的理解更好。ARC时代来临后，对象何时去释放，越来越变得模糊。">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-07-28T05:59:37.742Z">
+<meta property="og:updated_time" content="2018-07-28T15:12:29.733Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="关于Autorelease和内存管理">
-<meta name="twitter:description" content="引用计数​    对于用alloc/new/copy/mutableCopy方法生成并持有，或者retain都会使对象的引用计数加1，当引用计数为0时，对象会被销毁。MRC时代，对象的引用计数需要自己管理。创建一个对象后需要自己去释放，内存管理相当的繁琐，但对内存的控制会更有主动权，内存管理的理解更好。此外，对于一个对象如果调用了多次releasse会导致崩溃，崩溃的原因是对象已经被销毁，造成了野">
+<meta name="twitter:description" content="​    MRC时代，对象的引用计数需要自己管理。创建一个对象后需要自己去释放，内存管理相当的繁琐，但对内存的控制会更有主动权，内存管理的理解更好。ARC时代来临后，对象何时去释放，越来越变得模糊。">
 
 
 
@@ -299,7 +299,9 @@
       
 
       
-        <h3 id="引用计数"><a href="#引用计数" class="headerlink" title="引用计数"></a>引用计数</h3><p>​    对于用alloc/new/copy/mutableCopy方法生成并持有，或者retain都会使对象的引用计数加1，当引用计数为0时，对象会被销毁。MRC时代，对象的引用计数需要自己管理。创建一个对象后需要自己去释放，内存管理相当的繁琐，但对内存的控制会更有主动权，内存管理的理解更好。此外，对于一个对象如果调用了多次releasse会导致崩溃，崩溃的原因是对象已经被销毁，造成了野指针访问。ARC时代来临后，对象何时去释放，越来越变得模糊。</p>
+        <p>​    MRC时代，对象的引用计数需要自己管理。创建一个对象后需要自己去释放，内存管理相当的繁琐，但对内存的控制会更有主动权，内存管理的理解更好。ARC时代来临后，对象何时去释放，越来越变得模糊。</p>
+<a id="more"></a>
+<h3 id="引用计数"><a href="#引用计数" class="headerlink" title="引用计数"></a>引用计数</h3><p>​    对于用alloc/new/copy/mutableCopy方法生成并持有，或者retain都会使对象的引用计数加1，当引用计数为0时，对象会被销毁。MRC时代，对象的引用计数需要自己管理。创建一个对象后需要自己去释放，内存管理相当的繁琐，但对内存的控制会更有主动权，内存管理的理解更好。此外，对于一个对象如果调用了多次releasse会导致崩溃，崩溃的原因是对象已经被销毁，造成了野指针访问。</p>
 <p>​    系统采用散列表（引用计数表）管理引用计数。1.对象用内存块的分配无需考虑内存块头部。2.引用计数表各记录中存有内存块地址，可从各个记录追溯到各对象的内存块。</p>
 <h3 id="自动释放池"><a href="#自动释放池" class="headerlink" title="自动释放池"></a>自动释放池</h3><p>​    autorelease就是自动释放。是MRC时代的产物，它更类似于局部变量（自动变量），在变量超出作用域的时候自动废弃。但autorelease不会在超出作用域后<em>立刻</em>自动release。autorelease的对象会注册到autoreleasepool中，当autoreleasepool清理（drain)的时候将所有releasepool中的对象逐一release一次。</p>
 <p>​    一个iOS进程中系统会自动创建pool，在主线程runloop每次循环过程中都会废弃旧的pool，并创建新的。可知autorelease的对象并不是立刻销毁的，而是等到注册到的releasepool销毁的时候才能被销毁。</p>
@@ -538,9 +540,6 @@
 
 
 
-  
-  
-
 
 
 
@@ -577,16 +576,6 @@
   
   
     <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/three/three.min.js"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/three/three-waves.min.js"></script>
   
 
 
