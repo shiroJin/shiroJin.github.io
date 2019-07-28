@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="一只代码狗的随笔">
 <meta property="og:description" content="在应用开发过程中会碰到加载大图占用内存过多导致内存溢出的情况。一张图片占用的内存大小是有迹可循的。比如一个RGBA的像素，占用的内存大小为4byte。一张100x100像素的图片解压缩后占用的内存大小大约为100x100x4byte的内存（这里暂时不考虑图片信息之类的内存占用，仅举例说明）。 对于一个手机应用来说，图片显示的区域不会太大。假如图片显示的区域为1000x1000pixel，显示的图片">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-06-25T13:52:27.594Z">
+<meta property="og:updated_time" content="2019-06-29T08:50:40.941Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="PNG图片编解码探索">
 <meta name="twitter:description" content="在应用开发过程中会碰到加载大图占用内存过多导致内存溢出的情况。一张图片占用的内存大小是有迹可循的。比如一个RGBA的像素，占用的内存大小为4byte。一张100x100像素的图片解压缩后占用的内存大小大约为100x100x4byte的内存（这里暂时不考虑图片信息之类的内存占用，仅举例说明）。 对于一个手机应用来说，图片显示的区域不会太大。假如图片显示的区域为1000x1000pixel，显示的图片">
@@ -302,8 +302,8 @@
         <p>在应用开发过程中会碰到加载大图占用内存过多导致内存溢出的情况。一张图片占用的内存大小是有迹可循的。比如一个RGBA的像素，占用的内存大小为4byte。一张100x100像素的图片解压缩后占用的内存大小大约为100x100x4byte的内存（这里暂时不考虑图片信息之类的内存占用，仅举例说明）。</p>
 <p>对于一个手机应用来说，图片显示的区域不会太大。假如图片显示的区域为1000x1000pixel，显示的图片原始数据为1wx1w的图片，那这张图片的像素数量远远超过了屏幕能显示的像素数量。那大部分的像素其实是没有价值的。反而解压缩原始尺寸后的图片占用的内容是非常庞大的。</p>
 <p>于是乎就可以想到这么一个方案——在显示图片的时候根据原始图片生成一个满足显示需求的小图，这样就可以减少内存的占用。这也是现在业内使用的主流方案。</p>
-<p>在这里有一个问题，生成小图的方式是可以有效的解决之后显示图片所需要的内存。那么在生成小图这个阶段，是不是需要将原始的图片数据先读取到内存中，对原始数据解压缩，然后再生成相应的压缩图片。那在这一步中，图片读取和压缩的过程一定会带来一个内存峰值。也来到本文的一个主题，图片的解压缩存不存一种方式——边读取图片数据边生成采样率低的图片，从而保证处理过的数据的内存可以及时的释放。</p>
-<p>&lt; — hasmore —&gt;</p>
+<p>在这里有一个问题，生成小图的方式是可以有效的解决之后显示图片所需要的内存。那么在生成小图这个阶段，是不是需要将原始的图片数据先读取到内存中，对原始数据解压缩，然后再生成相应的压缩图片。那在这一步中，图片读取和压缩的过程一定会带来一个内存峰值。也来到本文的一个主题，图片的解压缩存不存一种方式———边读取图片数据边生成采样率低的图片，从而保证处理过的数据的内存可以及时的释放。</p>
+<a id="more"></a>
 <p>这里只探索一般格式的PNG图片。</p>
 <h1 id="PNG格式图片"><a href="#PNG格式图片" class="headerlink" title="PNG格式图片"></a>PNG格式图片</h1><p>便携式网络图形是一种<a href="https://baike.baidu.com/item/无损压缩/2817566" target="_blank" rel="noopener">无损压缩</a>的位图片形格式，其设计目的是试图替代<a href="https://baike.baidu.com/item/GIF" target="_blank" rel="noopener">GIF</a>和<a href="https://baike.baidu.com/item/TIFF/2106" target="_blank" rel="noopener">TIFF</a>文件格式，同时增加一些<a href="https://baike.baidu.com/item/GIF文件格式" target="_blank" rel="noopener">GIF文件格式</a>所不具备的特性。PNG使用从LZ77派生的无损数据压缩算法，一般应用于JAVA程序、<a href="https://baike.baidu.com/item/网页/99347" target="_blank" rel="noopener">网页</a>或S60程序中，原因是它<a href="https://baike.baidu.com/item/压缩比/109904" target="_blank" rel="noopener">压缩比</a>高，生成文件体积小。</p>
 <h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><p>对于一个PNG文件来说，其文件头总是由位固定的字节来描述的，HEX： 89 50 4E 47 0D 0A 1A 0A。其中 50 4E 47对应的ASCII码是P N G。第一个字节0x89超出了ASCII字符的范围，这是为了避免某些软件将PNG文件当做文本文件来处理。文件中剩余的部分由多个PNG的数据块组成。一个标准的PNG文件结构应该如下：</p>
