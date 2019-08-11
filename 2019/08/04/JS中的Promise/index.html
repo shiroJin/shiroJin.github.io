@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="JS中的Promise一、promise介绍promise原是前端社区中为解决回调陷阱而提出的一种方案。后在ES6中，官方对此进行了统一支持。promise写的代码便于阅读，代码相较优雅。 二、promise的基础使用promise是一个对象，构造方法中的参数是一个function，这里我们称之为executor，executor有两个参数——resolve和reject，两个参数也都是funct">
+<meta name="description" content="一、promise介绍promise原是前端社区中为解决回调陷阱而提出的一种方案。后在ES6中，官方对此进行了统一支持。promise写的代码便于阅读，代码相较优雅。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="一只代码狗的随笔">
+<meta property="og:title" content="Promise基础介绍">
 <meta property="og:url" content="http://yoursite.com/2019/08/04/JS中的Promise/index.html">
 <meta property="og:site_name" content="一只代码狗的随笔">
-<meta property="og:description" content="JS中的Promise一、promise介绍promise原是前端社区中为解决回调陷阱而提出的一种方案。后在ES6中，官方对此进行了统一支持。promise写的代码便于阅读，代码相较优雅。 二、promise的基础使用promise是一个对象，构造方法中的参数是一个function，这里我们称之为executor，executor有两个参数——resolve和reject，两个参数也都是funct">
+<meta property="og:description" content="一、promise介绍promise原是前端社区中为解决回调陷阱而提出的一种方案。后在ES6中，官方对此进行了统一支持。promise写的代码便于阅读，代码相较优雅。">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="https://mdn.mozillademos.org/files/15911/promises.png">
-<meta property="og:updated_time" content="2019-08-04T09:23:35.226Z">
+<meta property="og:updated_time" content="2019-08-11T15:39:02.943Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="一只代码狗的随笔">
-<meta name="twitter:description" content="JS中的Promise一、promise介绍promise原是前端社区中为解决回调陷阱而提出的一种方案。后在ES6中，官方对此进行了统一支持。promise写的代码便于阅读，代码相较优雅。 二、promise的基础使用promise是一个对象，构造方法中的参数是一个function，这里我们称之为executor，executor有两个参数——resolve和reject，两个参数也都是funct">
+<meta name="twitter:title" content="Promise基础介绍">
+<meta name="twitter:description" content="一、promise介绍promise原是前端社区中为解决回调陷阱而提出的一种方案。后在ES6中，官方对此进行了统一支持。promise写的代码便于阅读，代码相较优雅。">
 <meta name="twitter:image" content="https://mdn.mozillademos.org/files/15911/promises.png">
 
 
@@ -127,7 +127,7 @@
 
 
 
-  <title> | 一只代码狗的随笔</title>
+  <title>Promise基础介绍 | 一只代码狗的随笔</title>
   
 
 
@@ -251,7 +251,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline"></h1>
+          <h1 class="post-title" itemprop="name headline">Promise基础介绍</h1>
         
 
         <div class="post-meta">
@@ -301,7 +301,7 @@
       
 
       
-        <h1 id="JS中的Promise"><a href="#JS中的Promise" class="headerlink" title="JS中的Promise"></a>JS中的Promise</h1><h3 id="一、promise介绍"><a href="#一、promise介绍" class="headerlink" title="一、promise介绍"></a>一、promise介绍</h3><p>promise原是前端社区中为解决回调陷阱而提出的一种方案。后在ES6中，官方对此进行了统一支持。promise写的代码便于阅读，代码相较优雅。</p>
+        <h3 id="一、promise介绍"><a href="#一、promise介绍" class="headerlink" title="一、promise介绍"></a>一、promise介绍</h3><p>promise原是前端社区中为解决回调陷阱而提出的一种方案。后在ES6中，官方对此进行了统一支持。promise写的代码便于阅读，代码相较优雅。<br><a id="more"></a></p>
 <h3 id="二、promise的基础使用"><a href="#二、promise的基础使用" class="headerlink" title="二、promise的基础使用"></a>二、promise的基础使用</h3><p>promise是一个对象，构造方法中的参数是一个function，这里我们称之为executor，executor有两个参数——resolve和reject，两个参数也都是function。executor中执行相应的逻辑，在逻辑处理完成之后，根据结果的状态调用对应的函数——reject或者resolve。</p>
 <p><em>简单的promise构造代码：</em></p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> promise1 = <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span>(<span class="params">resolve, reject</span>) </span>&#123;</span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">    处理业务逻辑</span></span><br><span class="line"><span class="comment">    ...</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">  <span class="keyword">if</span> (ok)&#123;</span><br><span class="line">    resolve(<span class="string">'foo'</span>)</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		reject(<span class="string">'err'</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
@@ -465,7 +465,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#JS中的Promise"><span class="nav-number">1.</span> <span class="nav-text">JS中的Promise</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#一、promise介绍"><span class="nav-number">1.0.1.</span> <span class="nav-text">一、promise介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二、promise的基础使用"><span class="nav-number">1.0.2.</span> <span class="nav-text">二、promise的基础使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三、promise使用实例"><span class="nav-number">1.0.3.</span> <span class="nav-text">三、promise使用实例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四、async和await"><span class="nav-number">1.0.4.</span> <span class="nav-text">四、async和await</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">1.0.5.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#一、promise介绍"><span class="nav-number">1.</span> <span class="nav-text">一、promise介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二、promise的基础使用"><span class="nav-number">2.</span> <span class="nav-text">二、promise的基础使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三、promise使用实例"><span class="nav-number">3.</span> <span class="nav-text">三、promise使用实例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四、async和await"><span class="nav-number">4.</span> <span class="nav-text">四、async和await</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
             
 
           </div>
