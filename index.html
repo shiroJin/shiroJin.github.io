@@ -232,6 +232,422 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/10/07/了解xcodeproj/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jin.">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一只代码狗的随笔">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/10/07/了解xcodeproj/" itemprop="url">Untitled</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-10-07T16:33:31+08:00">
+                2019-10-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="了解xcodeproj"><a href="#了解xcodeproj" class="headerlink" title="了解xcodeproj"></a>了解xcodeproj</h1><p>​    在工作中遇到一个需求，比较两个target的不同——编译资源和资源文件的不同。我们都知道.m文件会参与编译；xib，assets文件会作为包的资源文件。头文件在预处理时使用。那xcode是如何组织这些内容的。本文的主角xcodeproj做了这些。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/10/07/了解xcodeproj/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/19/LRU算法/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jin.">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一只代码狗的随笔">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/08/19/LRU算法/" itemprop="url">LRU算法</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-08-19T21:39:07+08:00">
+                2019-08-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>使用mac的时候，cmd+tab切换应用非常舒服。其中的算法就是LRU算法。LRU全称Least Recently Used，即最近最少使用算法。</p>
+<p>把我们的应用标记为A，B，C，D</p>
+<p>我们依次打开应用，切换时应用的顺序为：D-&gt;C-&gt;B-&gt;A</p>
+<p>当我们切换到应用B后，应用的排序就变成了：C-&gt;D-&gt;B-&gt;A</p>
+<p>当前应用的下一个应用就是上一次使用的应用。这就使的在两个应用间来回切换时就变得非常的便利。</p>
+<p>以下用链表来实现最简单的LRU算法：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// Definition for a binary tree node.</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">LinkNode</span>(<span class="params">val</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.val = val;</span><br><span class="line">  <span class="keyword">this</span>.prev = <span class="keyword">this</span>.next = <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> head = <span class="keyword">new</span> LinkNode()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">addNode</span>(<span class="params">val</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> curNode = <span class="keyword">new</span> LinkNode(val)</span><br><span class="line">  <span class="comment">/// 新节点插入到最前面</span></span><br><span class="line">  <span class="keyword">if</span> (head.next) head.next.prev = curNode</span><br><span class="line">  curNode.next = head.next</span><br><span class="line">  curNode.prev = head</span><br><span class="line">  head.next = curNode</span><br><span class="line">  <span class="keyword">return</span> curNode</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">removeNode</span>(<span class="params">node</span>) </span>&#123;</span><br><span class="line">  <span class="comment">/// 当前节点的前后两个节点连接</span></span><br><span class="line">  node.prev.next = node.next</span><br><span class="line">  node.next.prev = node.prev</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">bringToFront</span>(<span class="params">node</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (head.next === node) <span class="keyword">return</span> </span><br><span class="line">  <span class="comment">/// 当前节点的前后两个节点连接</span></span><br><span class="line">  node.prev.next = node.next</span><br><span class="line">  node.next.prev = node.prev</span><br><span class="line">  <span class="comment">/// 当前节点插到最前面</span></span><br><span class="line">  <span class="keyword">if</span> (head.next) head.next.prev = node</span><br><span class="line">  node.next = head.next</span><br><span class="line">  head.next = node</span><br><span class="line">  node.prev = head</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">log</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> result = <span class="string">''</span></span><br><span class="line">  <span class="keyword">let</span> node = head.next</span><br><span class="line">  <span class="keyword">while</span>(node) &#123;</span><br><span class="line">    result += node.val</span><br><span class="line">    node = node.next</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">console</span>.log(result)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> nodeA = addNode(<span class="string">'a'</span>)</span><br><span class="line"><span class="keyword">let</span> nodeB = addNode(<span class="string">'b'</span>)</span><br><span class="line"><span class="keyword">let</span> nodeC = addNode(<span class="string">'c'</span>)</span><br><span class="line"></span><br><span class="line">log()</span><br><span class="line"><span class="comment">/// expected cba</span></span><br><span class="line"></span><br><span class="line">bringToFront(nodeB)</span><br><span class="line"></span><br><span class="line">log()</span><br><span class="line"><span class="comment">/// expected bca</span></span><br></pre></td></tr></table></figure>
+<p>LRU的算法实现原理其实并不复杂，但简单的原理在生活中有着很好的表现。可能也是算法之美——化繁为简。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/18/静态链接器/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jin.">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一只代码狗的随笔">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/08/18/静态链接器/" itemprop="url">Untitled</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-08-18T22:43:00+08:00">
+                2019-08-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="静态链接器"><a href="#静态链接器" class="headerlink" title="静态链接器"></a>静态链接器</h1><h4 id="职责"><a href="#职责" class="headerlink" title="职责"></a>职责</h4><ul>
+<li><p>输入：编译后的ELF文件</p>
+</li>
+<li><p>输出：将多个文件中引符号重定位，不同文件中相同段的合并，最后合成一个可执行文件</p>
+</li>
+</ul>
+<h3 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h3><p>一、段空间和地址分配</p>
+<p>​    扫描所有的输入目标文件，收集所有目标文件的符号表到一个全局符号表中，将相同的段合并。</p>
+<p><img src="/Users/mashiro_jin/Library/Group Containers/Q79WDW8YH9.com.evernote.Evernote/Evernote/quick-note/13630831-personal-app.yinxiang.com/quick-note-ap5jhC/attachment--NlsgIJ/screenshot.png" alt="screenshot"></p>
+<p></p><p style="text-align:center;font-style:italic;">section合并</p><br>二、符号解析<p></p>
+<p>​    每个编译文件中都有自己符号表，符号有些事静态的，有些是全局的。对于全局的，不同的文件定义的、引用的符号各不相同。全局变量的符号放在Common段中，静态变量放在bss段中，因为静态变量的大小是确定的，而全局变量因为弱类型进制的缘故，全局变量的符号大小时不确定的。对于静态的符号，段的地址确定后，静态符号的地址也就能确定。对于全局变量，不容的文件中可能定义了相同的符号，对于有冲突的符号需要做符号决议。然后确定符号的地址。</p>
+<blockquote>
+<p><strong>符号决议：</strong><br>    确定符号的定义，符号的定义有强弱之分，强符号覆盖弱符号。若在不同段中定义了相同的强符号，链接就会失败。</p>
+</blockquote>
+<p>三、符号重定位</p>
+<p>​    对于单个文件，引用了其他文件的符号，这个符号的地址是未确认的。例如，一个文件中引用了foo函数，但是foo函数定义在其他文件中，当编译器编译这个文件时，编译器并不知道foo这个符号的地址。对于单个的ELF文件，foo函数这个符号是没有定义的。符号的重定位是链接器是主要工作内容。链接器将没有地址的符号赋予正确的地址。</p>
+<p>​    符号重定位有两种方式，绝对寻址和相对寻址。</p>
+<p>A：保存在被修正位置的值</p>
+<p>B：被修正的位置（相对于段开始的偏移量或者虚拟地址）</p>
+<p>P：符号的实际地址</p>
+<ul>
+<li><p>绝对寻址</p>
+<p>S+A</p>
+</li>
+<li><p>相对寻址</p>
+<p>S+A-P</p>
+</li>
+</ul>
+<p>三、输出文件</p>
+<p>​    最终，链接结束，输出.out文件，文件中只有.bss，.text，.data段。</p>
+<h1 id="动态链接器"><a href="#动态链接器" class="headerlink" title="动态链接器"></a>动态链接器</h1><p>​    由于静态链接库在每个可执行文件中都有一份，导致了内存浪费的问题。由此动态链接库就出现了，伴随着符号解析和重定位的工作就有了动态链接器。</p>
+<p>​    <img src="/Users/mashiro_jin/Library/Group Containers/Q79WDW8YH9.com.evernote.Evernote/Evernote/quick-note/13630831-personal-app.yinxiang.com/quick-note-ap5jhC/attachment--VPMhOy/screenshot.png" alt="screenshot"></p>
+<p></p><p style="text-align: center;font-style: italic">动态库内存分配</p><br>​    动态链接库的代码在多个进程间是共享的，动态库只会加载到内存中一次。当随后的进程链接动态库时不需要再次加载进内存，因此动态库到达了节省内存的作用。<p></p>
+<p>​    思考两个问题：</p>
+<ol>
+<li>执行文件如何进行重定位</li>
+<li>共享库数据是否会共享</li>
+</ol>
+<p>ipc代码——位置无关代码。全局变量、全局函数GOT、so模块内全局变量副本</p>
+<p>动态链接带来的负面影响是复杂的GOT重定位会降低程序的启动速度</p>
+<p>优化方案：</p>
+<p>一、延迟绑定PLT</p>
+<p>plt item结构如下，</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">foo@plt:</span><br><span class="line">	jump *(foo@got)</span><br><span class="line">	push offset</span><br><span class="line">	jump PLT0</span><br></pre></td></tr></table></figure>
+<p>​    foo@got中存放着foo函数的地址，在程序加载时，foo@got的地址为下一条指令的地址，即执行push offset。PLT0为公共的重定位函数——_dl_runtime_resolve。_dl_runtime_resolve函数对入参函数进行重定位，并将重定位的地址写入foo@got。当第二次调用foo函数，将直接调转到foo函数的地址。这样的设计非常巧妙，一个符号的重定位过程只会发生一次，随后的调用无需再进行重定位。</p>
+<p>​    动态符号表，</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/04/JS中的Promise/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1134,378 +1550,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/09/09/iOS Crash Catch/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Jin.">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="一只代码狗的随笔">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/09/09/iOS Crash Catch/" itemprop="url">iOS Crash Catch</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-09-09T14:37:04+08:00">
-                2018-09-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>​    iOS中的崩溃主要分为两种：oc语言抛出的异常和Mach层的异常。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/09/09/iOS Crash Catch/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/09/02/nandgame攻略/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Jin.">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="一只代码狗的随笔">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/09/02/nandgame攻略/" itemprop="url">nandgame全攻略</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-09-02T16:44:13+08:00">
-                2018-09-02
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>nandgame是一个网页教学网站，从简单的逻辑电路到最后的CPU，通过关卡的模式，一步步深入的探索。非常适合平时机器工作较多的小伙伴们，可以锻炼一下逻辑思维~。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/09/02/nandgame攻略/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/07/28/autorelease简介/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Jin.">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="一只代码狗的随笔">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/07/28/autorelease简介/" itemprop="url">关于Autorelease和内存管理</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-28T13:45:04+08:00">
-                2018-07-28
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>​    MRC时代，对象的引用计数需要自己管理。创建一个对象后需要自己去释放，内存管理相当的繁琐，但对内存的控制会更有主动权，内存管理的理解更好。ARC时代来临后，对象何时去释放，越来越变得模糊。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/07/28/autorelease简介/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1556,7 +1600,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-count">15</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>

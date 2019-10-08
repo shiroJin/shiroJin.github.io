@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="静态链接器职责 输入：编译后的ELF文件  输出：将多个文件中引符号重定位，不同文件中相同段的合并，最后合成一个可执行文件   工作流程一、段空间和地址分配 ​    扫描所有的输入目标文件，收集所有目标文件的符号表到一个全局符号表中，将相同的段合并。  section合并二、符号解析 ​    每个编译文件中都有自己符号表，符号有些事静态的，有些是全局的。对于全局的，不同的文件定义的、引用的符号">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一只代码狗的随笔">
+<meta property="og:url" content="http://yoursite.com/2019/08/18/静态链接器/index.html">
+<meta property="og:site_name" content="一只代码狗的随笔">
+<meta property="og:description" content="静态链接器职责 输入：编译后的ELF文件  输出：将多个文件中引符号重定位，不同文件中相同段的合并，最后合成一个可执行文件   工作流程一、段空间和地址分配 ​    扫描所有的输入目标文件，收集所有目标文件的符号表到一个全局符号表中，将相同的段合并。  section合并二、符号解析 ​    每个编译文件中都有自己符号表，符号有些事静态的，有些是全局的。对于全局的，不同的文件定义的、引用的符号">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/Users/mashiro_jin/Library/Group%20Containers/Q79WDW8YH9.com.evernote.Evernote/Evernote/quick-note/13630831-personal-app.yinxiang.com/quick-note-ap5jhC/attachment--NlsgIJ/screenshot.png">
+<meta property="og:image" content="http://yoursite.com/Users/mashiro_jin/Library/Group%20Containers/Q79WDW8YH9.com.evernote.Evernote/Evernote/quick-note/13630831-personal-app.yinxiang.com/quick-note-ap5jhC/attachment--VPMhOy/screenshot.png">
+<meta property="og:updated_time" content="2019-10-04T02:36:27.295Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="一只代码狗的随笔">
+<meta name="twitter:description" content="静态链接器职责 输入：编译后的ELF文件  输出：将多个文件中引符号重定位，不同文件中相同段的合并，最后合成一个可执行文件   工作流程一、段空间和地址分配 ​    扫描所有的输入目标文件，收集所有目标文件的符号表到一个全局符号表中，将相同的段合并。  section合并二、符号解析 ​    每个编译文件中都有自己符号表，符号有些事静态的，有些是全局的。对于全局的，不同的文件定义的、引用的符号">
+<meta name="twitter:image" content="http://yoursite.com/Users/mashiro_jin/Library/Group%20Containers/Q79WDW8YH9.com.evernote.Evernote/Evernote/quick-note/13630831-personal-app.yinxiang.com/quick-note-ap5jhC/attachment--NlsgIJ/screenshot.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/08/18/静态链接器/"/>
+
+
+
+
+
+  <title> | 一只代码狗的随笔</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">一只代码狗的随笔</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">知其然知其所以然！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/18/静态链接器/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jin.">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一只代码狗的随笔">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline"></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-08-18T22:43:00+08:00">
+                2019-08-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="静态链接器"><a href="#静态链接器" class="headerlink" title="静态链接器"></a>静态链接器</h1><h4 id="职责"><a href="#职责" class="headerlink" title="职责"></a>职责</h4><ul>
+<li><p>输入：编译后的ELF文件</p>
+</li>
+<li><p>输出：将多个文件中引符号重定位，不同文件中相同段的合并，最后合成一个可执行文件</p>
+</li>
+</ul>
+<h3 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h3><p>一、段空间和地址分配</p>
+<p>​    扫描所有的输入目标文件，收集所有目标文件的符号表到一个全局符号表中，将相同的段合并。</p>
+<p><img src="/Users/mashiro_jin/Library/Group Containers/Q79WDW8YH9.com.evernote.Evernote/Evernote/quick-note/13630831-personal-app.yinxiang.com/quick-note-ap5jhC/attachment--NlsgIJ/screenshot.png" alt="screenshot"></p>
+<p></p><p style="text-align:center;font-style:italic;">section合并</p><br>二、符号解析<p></p>
+<p>​    每个编译文件中都有自己符号表，符号有些事静态的，有些是全局的。对于全局的，不同的文件定义的、引用的符号各不相同。全局变量的符号放在Common段中，静态变量放在bss段中，因为静态变量的大小是确定的，而全局变量因为弱类型进制的缘故，全局变量的符号大小时不确定的。对于静态的符号，段的地址确定后，静态符号的地址也就能确定。对于全局变量，不容的文件中可能定义了相同的符号，对于有冲突的符号需要做符号决议。然后确定符号的地址。</p>
+<blockquote>
+<p><strong>符号决议：</strong><br>    确定符号的定义，符号的定义有强弱之分，强符号覆盖弱符号。若在不同段中定义了相同的强符号，链接就会失败。</p>
+</blockquote>
+<p>三、符号重定位</p>
+<p>​    对于单个文件，引用了其他文件的符号，这个符号的地址是未确认的。例如，一个文件中引用了foo函数，但是foo函数定义在其他文件中，当编译器编译这个文件时，编译器并不知道foo这个符号的地址。对于单个的ELF文件，foo函数这个符号是没有定义的。符号的重定位是链接器是主要工作内容。链接器将没有地址的符号赋予正确的地址。</p>
+<p>​    符号重定位有两种方式，绝对寻址和相对寻址。</p>
+<p>A：保存在被修正位置的值</p>
+<p>B：被修正的位置（相对于段开始的偏移量或者虚拟地址）</p>
+<p>P：符号的实际地址</p>
+<ul>
+<li><p>绝对寻址</p>
+<p>S+A</p>
+</li>
+<li><p>相对寻址</p>
+<p>S+A-P</p>
+</li>
+</ul>
+<p>三、输出文件</p>
+<p>​    最终，链接结束，输出.out文件，文件中只有.bss，.text，.data段。</p>
+<h1 id="动态链接器"><a href="#动态链接器" class="headerlink" title="动态链接器"></a>动态链接器</h1><p>​    由于静态链接库在每个可执行文件中都有一份，导致了内存浪费的问题。由此动态链接库就出现了，伴随着符号解析和重定位的工作就有了动态链接器。</p>
+<p>​    <img src="/Users/mashiro_jin/Library/Group Containers/Q79WDW8YH9.com.evernote.Evernote/Evernote/quick-note/13630831-personal-app.yinxiang.com/quick-note-ap5jhC/attachment--VPMhOy/screenshot.png" alt="screenshot"></p>
+<p></p><p style="text-align: center;font-style: italic">动态库内存分配</p><br>​    动态链接库的代码在多个进程间是共享的，动态库只会加载到内存中一次。当随后的进程链接动态库时不需要再次加载进内存，因此动态库到达了节省内存的作用。<p></p>
+<p>​    思考两个问题：</p>
+<ol>
+<li>执行文件如何进行重定位</li>
+<li>共享库数据是否会共享</li>
+</ol>
+<p>ipc代码——位置无关代码。全局变量、全局函数GOT、so模块内全局变量副本</p>
+<p>动态链接带来的负面影响是复杂的GOT重定位会降低程序的启动速度</p>
+<p>优化方案：</p>
+<p>一、延迟绑定PLT</p>
+<p>plt item结构如下，</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">foo@plt:</span><br><span class="line">	jump *(foo@got)</span><br><span class="line">	push offset</span><br><span class="line">	jump PLT0</span><br></pre></td></tr></table></figure>
+<p>​    foo@got中存放着foo函数的地址，在程序加载时，foo@got的地址为下一条指令的地址，即执行push offset。PLT0为公共的重定位函数——_dl_runtime_resolve。_dl_runtime_resolve函数对入参函数进行重定位，并将重定位的地址写入foo@got。当第二次调用foo函数，将直接调转到foo函数的地址。这样的设计非常巧妙，一个符号的重定位过程只会发生一次，随后的调用无需再进行重定位。</p>
+<p>​    动态符号表，</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/08/04/JS中的Promise/" rel="next" title="Promise基础介绍">
+                <i class="fa fa-chevron-left"></i> Promise基础介绍
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/08/19/LRU算法/" rel="prev" title="LRU算法">
+                LRU算法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Jin.</p>
+              <p class="site-description motion-element" itemprop="description">知其然知其所以然！</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#静态链接器"><span class="nav-number">1.</span> <span class="nav-text">静态链接器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#职责"><span class="nav-number">1.0.0.1.</span> <span class="nav-text">职责</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#工作流程"><span class="nav-number">1.0.1.</span> <span class="nav-text">工作流程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#动态链接器"><span class="nav-number">2.</span> <span class="nav-text">动态链接器</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jin.</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
