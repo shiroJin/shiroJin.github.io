@@ -79,19 +79,19 @@
 
 
 
-<meta name="description" content="一个c语言编写的文件，需要经过以下四个步骤最后才能成为一个可执行文件。  预处理 编译 汇编 链接  ​    可以简单的理解为1-3步骤是对代码语言的处理，将高级语言译成机器可以识别的机器语言。步骤4是将每个编译后的文件整合为一个完整的可执行文件。这里主要探究链接这步骤。">
+<meta name="description" content="一个c语言编写的文件，需要经过以下四个步骤最后才能成为一个可执行文件。  预处理 编译 汇编 链接  ​    可以简单的理解为1-3步骤是对代码语言的处理，将高级语言译成机器可以识别的机器语言。步骤4是将每个编译后的文件整合为一个完整的可执行文件，链接的实质是将符号和定义联系在一起。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="初识链接器">
 <meta property="og:url" content="http://yoursite.com/2019/08/18/初识链接器/index.html">
 <meta property="og:site_name" content="一只代码狗的随笔">
-<meta property="og:description" content="一个c语言编写的文件，需要经过以下四个步骤最后才能成为一个可执行文件。  预处理 编译 汇编 链接  ​    可以简单的理解为1-3步骤是对代码语言的处理，将高级语言译成机器可以识别的机器语言。步骤4是将每个编译后的文件整合为一个完整的可执行文件。这里主要探究链接这步骤。">
+<meta property="og:description" content="一个c语言编写的文件，需要经过以下四个步骤最后才能成为一个可执行文件。  预处理 编译 汇编 链接  ​    可以简单的理解为1-3步骤是对代码语言的处理，将高级语言译成机器可以识别的机器语言。步骤4是将每个编译后的文件整合为一个完整的可执行文件，链接的实质是将符号和定义联系在一起。">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="https://raw.githubusercontent.com/shiroJin/image-storage/master/linker_1.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/shiroJin/image-storage/master/linker_2.png">
-<meta property="og:updated_time" content="2019-11-09T11:31:50.541Z">
+<meta property="og:updated_time" content="2020-01-22T06:04:15.845Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="初识链接器">
-<meta name="twitter:description" content="一个c语言编写的文件，需要经过以下四个步骤最后才能成为一个可执行文件。  预处理 编译 汇编 链接  ​    可以简单的理解为1-3步骤是对代码语言的处理，将高级语言译成机器可以识别的机器语言。步骤4是将每个编译后的文件整合为一个完整的可执行文件。这里主要探究链接这步骤。">
+<meta name="twitter:description" content="一个c语言编写的文件，需要经过以下四个步骤最后才能成为一个可执行文件。  预处理 编译 汇编 链接  ​    可以简单的理解为1-3步骤是对代码语言的处理，将高级语言译成机器可以识别的机器语言。步骤4是将每个编译后的文件整合为一个完整的可执行文件，链接的实质是将符号和定义联系在一起。">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/shiroJin/image-storage/master/linker_1.png">
 
 
@@ -309,7 +309,7 @@
 <li>汇编</li>
 <li>链接</li>
 </ol>
-<p>​    可以简单的理解为1-3步骤是对代码语言的处理，将高级语言译成机器可以识别的机器语言。步骤4是将每个编译后的文件整合为一个完整的可执行文件。这里主要探究链接这步骤。<br><a id="more"></a></p>
+<p>​    可以简单的理解为1-3步骤是对代码语言的处理，将高级语言译成机器可以识别的机器语言。步骤4是将每个编译后的文件整合为一个完整的可执行文件，链接的实质是将符号和定义联系在一起。<br><a id="more"></a></p>
 <p><strong>ELF结构:</strong></p>
 <p>​    下表为ELF文件主体结构，每个ELF文件都是由多个段组成的，一些复杂的elf文件会涵盖很多不同的段，一些简单的ELF文件可能只包括少数的段。这些都是由代码中数据决定的。</p>
 <table>
@@ -322,7 +322,7 @@
 <tbody>
 <tr>
 <td>.text</td>
-<td>全局变量/静态c变量</td>
+<td>代码段</td>
 </tr>
 <tr>
 <td>.data</td>
@@ -372,8 +372,12 @@
 <h3 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h3><p><strong>一、段空间和地址分配</strong></p>
 <p>​    扫描所有的输入目标文件，收集所有目标文件的符号表到一个全局符号表中，将相同的段合并。在所有段合并成一个完整的文件后，符号的地址也随之可以确定下来。</p>
 <p><img src="https://raw.githubusercontent.com/shiroJin/image-storage/master/linker_1.png"></p>
-<p></p><p style="text-align:center;font-style:italic;">section合并</p><br><strong>二、符号解析</strong><p></p>
-<p>​    每个编译文件中都有自己符号表，符号有些事静态的，有些是全局的。对于全局的，不同的文件定义的、引用的符号各不相同。全局变量的符号放在Common段中，静态变量放在bss段中，因为静态变量的大小是确定的，而全局变量因为弱类型进制的缘故，全局变量的符号大小时不确定的。对于静态的符号，段的地址确定后，静态符号的地址也就能确定。对于全局变量，不容的文件中可能定义了相同的符号，对于有冲突的符号需要做符号决议。然后确定符号的地址。</p>
+<p></p><p style="text-align:center;font-style:italic;">section合并</p><p></p>
+<blockquote>
+<p><strong>段合并</strong>：程序在装载的时候，段的装载地址和空间的对齐单位是页，对于x86设备来说，页的大小是4096字节，即4kb。对于一个仅仅一个字节的段，它占据的空间也是4kb，这就造成了极大的空间浪费。因此相同段需要合并。</p>
+</blockquote>
+<p><strong>二、符号解析</strong></p>
+<p>​    每个编译文件中都有自己符号表，符号有些事静态的，有些是全局的。对于全局的，不同的文件定义的、引用的符号各不相同。全局变量的符号放在Common段中，静态变量放在bss段中，因为静态变量的大小是确定的，而全局变量因为弱类型进制的缘故，全局变量的符号大小时不确定的。对于静态的符号，段的地址确定后，静态符号的地址也就能确定。对于全局变量，不容的文件中可能定义了相同的符号，对于有冲突的符号需要进行符号决议，最终确定符号的地址。</p>
 <blockquote>
 <p><strong>符号决议：</strong><br>    确定符号的定义，符号的定义有强弱之分，强符号覆盖弱符号。若在不同段中定义了相同的强符号，链接就会失败。</p>
 </blockquote>
@@ -395,18 +399,44 @@
 <p>​    待所有符号重定位结束后，得到一个.out文件，一个可执行文件，文件中只有.bss，.text，.data段。没有符号表之类的段。</p>
 <h2 id="动态链接器"><a href="#动态链接器" class="headerlink" title="动态链接器"></a>动态链接器</h2><p>​    由于静态链接库在每个可执行文件中都有一份，导致了内存浪费的问题。如果可执行文件可以使用共享库就可以减少内存开支。动态链接库就是为了共享库而存在的，共享库的符号解析和重定位的工作由动态链接器完成。</p>
 <p><img src="https://raw.githubusercontent.com/shiroJin/image-storage/master/linker_2.png"></p>
-<p></p><p style="text-align: center;font-style: italic">动态库内存分配</p><br>​    动态链接库的代码在多个进程间是共享的，动态库只会加载到内存中一次。当随后的进程链接动态库时不需要再次加载进内存，因此动态库到达了节省内存的作用。<p></p>
-<p>​    共享库面临两个最基本的问题：</p>
-<p>1、执行文件如何进行重定位</p>
-<p>2、共享库数据是否会共享</p>
-<p>​    动态链接器使用ipc代码——位置无关代码，使得共享库的符号地址可以更好的确定。全局变量、全局函数GOT、so模块内全局变量副本</p>
-<p>​    同时，共享库带来的负面影响是复杂的GOT重定位会降低程序的启动速度——空间和时间的取舍在计算机中还是会常常面对。</p>
-<p>优化方案：</p>
-<p>一、延迟绑定PLT</p>
-<p>plt item结构如下，</p>
+<p></p><p style="text-align: center;font-style: italic">动态库内存分配</p><br>​    动态链接库的代码在多个进程间是共享的，动态库只会加载到内存中一次。当随后的进程链接动态库时不需要再次加载进内存，从而到达了节省内存的目的。<p></p>
+<p>​    在静态链接阶段，根据动态库的符号表，动态库中的符号会被标记。在静态链接的时候不会对标记的符号进行重定位。重定位的过程留在了程序加载时。</p>
+<blockquote>
+<p><em>接下来思考一下两个问题：</em></p>
+<ol>
+<li>执行文件如何进行重定位</li>
+<li>共享库数据是否会共享</li>
+</ol>
+</blockquote>
+<p>​    <strong>动态库的装载地址在编译阶段无法确定，只有在装载时才能确定</strong>。因此动态库的符号重定位与静态库的重定位方式不同。另外，对于每个动态库，多个进程之间代码段是共享的，数据段每个进程都会有自己独立的副本。</p>
+<p><strong>一、位置无关代码IPC</strong></p>
+<ul>
+<li><p>模块内函数调用及跳转</p>
+<p>内部函数的相对位置不会改变，他们的相对的偏移量是确定的，因此内部函数调用通过相对寻址进行定位。</p>
+</li>
+<li><p>模块内数据访问</p>
+<p>跟内部函数一样，模块内部的数据距整理个模块的起始地址的偏移量是固定的，只需要相对寻址就可以定位的对应的数据。</p>
+</li>
+<li><p>模块间函数调用及跳转</p>
+<p>模块间的函数符号地址与自身的装载地址无关，与其他模块的装载地址相关，因此无法直接通过相对寻址的方式进行调用或跳转。有此引入了GOT结构。ELF会在数据段建一个外部符号的全局偏移表，这个表是一个指向外部符号地址的数组。当代码中需要引用外部符号时，通过访问GOT结构进行间接引用。当模块被装载时，会去装载依赖的其他模块，然后修改GOT中的地址。由此可以发现，代码段的符号重定位变成了数据段的符号重定位。</p>
+</li>
+<li><p>模块间数据访问</p>
+<p>模块间数据的访问处理方式与上述函数调用方式相同，都是通过GOT结构进行间接访问。</p>
+</li>
+</ul>
+<p>综上模块内的符号引用通过相对地址访问、而模块间的符号引用通过GOT间接引用。</p>
+<p><strong>二、延迟绑定PLT</strong></p>
+<p>​    共享库有利也有弊，在节约空间资源的同时，复杂的GOT重定位会降低程序的启动速度（ps.空间和时间的取舍在计算机中还是会常常面对）。为了解决这一问题，so中引入了PLT结构，将GOT地址的绑定延迟到第一次引用时。plt item结构如下：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">foo@plt:</span><br><span class="line">	jump *(foo@got)</span><br><span class="line">	push offset</span><br><span class="line">	jump PLT0</span><br></pre></td></tr></table></figure>
 <p>​    foo@got中存放着foo函数的地址，在程序加载时，foo@got的地址为下一条指令的地址，即执行push offset。PLT0为公共的重定位函数——_dl_runtime_resolve。_dl_runtime_resolve函数对入参函数进行重定位，并将重定位的地址写入foo@got。当第二次调用foo函数，将直接调转到foo函数的地址。这样的设计非常巧妙，一个符号的重定位过程只会发生一次，随后的调用无需再进行重定位。</p>
-<p>​    动态符号表，</p>
+<p><strong>三、动态库结构</strong></p>
+<ul>
+<li><p>动态符号表：静态链接中，目标文件会有”.symtab“段，段中保存着目标文件的符号的定义和引用。动态库目标文件除了”.symtab“段保存成所有的符号信息外，还有”dynsym”段，保存着动态链接中模块之间的符号关系。</p>
+</li>
+<li><p>重定位表</p>
+</li>
+</ul>
+<h3 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h3><p>《程序员的自我修养——链接、装载与库》</p>
 
       
     </div>
@@ -520,7 +550,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-count">17</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -557,7 +587,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#静态链接器"><span class="nav-number">1.</span> <span class="nav-text">静态链接器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#职责"><span class="nav-number">1.0.1.</span> <span class="nav-text">职责</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#工作流程"><span class="nav-number">1.1.</span> <span class="nav-text">工作流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#动态链接器"><span class="nav-number">2.</span> <span class="nav-text">动态链接器</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#静态链接器"><span class="nav-number">1.</span> <span class="nav-text">静态链接器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#职责"><span class="nav-number">1.0.1.</span> <span class="nav-text">职责</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#工作流程"><span class="nav-number">1.1.</span> <span class="nav-text">工作流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#动态链接器"><span class="nav-number">2.</span> <span class="nav-text">动态链接器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#参考文献"><span class="nav-number">2.1.</span> <span class="nav-text">参考文献</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -577,7 +607,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
