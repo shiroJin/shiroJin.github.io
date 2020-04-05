@@ -86,12 +86,12 @@
 <meta property="og:site_name" content="一只代码狗的随笔">
 <meta property="og:description" content="​    由于对外分外的adhoc包只能安装在provisioning profile中已添加的设备。因此当有新设备添加时，需要单独更新provisioning profile，并对包进行一次重签名。针对新设备包更新的问题，对超级签名的方案进行了调研。  方案概述​    超级签名主要思路是让需要安装包的设备自行触发设备添加和重签名的操作，下图为超级签名的签名流程。">
 <meta property="og:locale" content="default">
-<meta property="og:image" content="http://yoursite.com/images/整体架构.jpg">
-<meta property="og:updated_time" content="2020-04-05T13:10:02.233Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/shiroJin/image-storage/master/super_sign.jpg">
+<meta property="og:updated_time" content="2020-04-05T13:18:05.267Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS ipa超级签名">
 <meta name="twitter:description" content="​    由于对外分外的adhoc包只能安装在provisioning profile中已添加的设备。因此当有新设备添加时，需要单独更新provisioning profile，并对包进行一次重签名。针对新设备包更新的问题，对超级签名的方案进行了调研。  方案概述​    超级签名主要思路是让需要安装包的设备自行触发设备添加和重签名的操作，下图为超级签名的签名流程。">
-<meta name="twitter:image" content="http://yoursite.com/images/整体架构.jpg">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/shiroJin/image-storage/master/super_sign.jpg">
 
 
 
@@ -304,7 +304,7 @@
         <p>​    由于对外分外的adhoc包只能安装在provisioning profile中已添加的设备。因此当有新设备添加时，需要单独更新provisioning profile，并对包进行一次重签名。针对新设备包更新的问题，对超级签名的方案进行了调研。</p>
 <hr>
 <h4 id="方案概述"><a href="#方案概述" class="headerlink" title="方案概述"></a>方案概述</h4><p>​    超级签名主要思路是让需要安装包的设备自行触发设备添加和重签名的操作，下图为超级签名的签名流程。<a id="more"></a></p>
-<p><img src="/images/整体架构.jpg" alt="整体架构"></p>
+<p><img src="https://raw.githubusercontent.com/shiroJin/image-storage/master/super_sign.jpg" alt="整体架构"></p>
 <ol>
 <li>设备安装描述文件后，会向服务器发送设备的UDID。</li>
 <li>服务器收到UDID后，将UDID注册到开发者账号下，添加到描述文件中。</li>
