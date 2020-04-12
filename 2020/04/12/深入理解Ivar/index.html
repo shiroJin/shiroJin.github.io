@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="​    ivar是类中的成员变量，@propery声明一个属性的时候就会产生一个成员变量。 获取类的成员变量​    在runtime中，通过class_copyIvarList(Class cls, unsigned int * outCount)函数可以获取类的成员变量列表。在这里需要注意的是，class_copyIvarList函数获取的是当前类声明的成员变量，它的父类声明的 成员变量并不">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入理解Ivar">
+<meta property="og:url" content="http://yoursite.com/2020/04/12/深入理解Ivar/index.html">
+<meta property="og:site_name" content="一只代码狗的随笔">
+<meta property="og:description" content="​    ivar是类中的成员变量，@propery声明一个属性的时候就会产生一个成员变量。 获取类的成员变量​    在runtime中，通过class_copyIvarList(Class cls, unsigned int * outCount)函数可以获取类的成员变量列表。在这里需要注意的是，class_copyIvarList函数获取的是当前类声明的成员变量，它的父类声明的 成员变量并不">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2020-04-12T13:28:59.984Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="深入理解Ivar">
+<meta name="twitter:description" content="​    ivar是类中的成员变量，@propery声明一个属性的时候就会产生一个成员变量。 获取类的成员变量​    在runtime中，通过class_copyIvarList(Class cls, unsigned int * outCount)函数可以获取类的成员变量列表。在这里需要注意的是，class_copyIvarList函数获取的是当前类声明的成员变量，它的父类声明的 成员变量并不">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/04/12/深入理解Ivar/"/>
+
+
+
+
+
+  <title>深入理解Ivar | 一只代码狗的随笔</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">一只代码狗的随笔</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">知其然知其所以然！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/04/12/深入理解Ivar/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jin.">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一只代码狗的随笔">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">深入理解Ivar</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-04-12T21:28:59+08:00">
+                2020-04-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>​    ivar是类中的成员变量，@propery声明一个属性的时候就会产生一个成员变量。</p>
+<h4 id="获取类的成员变量"><a href="#获取类的成员变量" class="headerlink" title="获取类的成员变量"></a>获取类的成员变量</h4><p>​    在runtime中，通过class_copyIvarList(Class cls, unsigned int * outCount)函数可以获取类的成员变量列表。在这里需要注意的是，class_copyIvarList函数获取的是当前类声明的成员变量，它的父类声明的 成员变量并不会返回。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/***********************************************************************</span></span><br><span class="line"><span class="comment">* class_copyIvarList</span></span><br><span class="line"><span class="comment">* fixme</span></span><br><span class="line"><span class="comment">* Locking: read-locks runtimeLock</span></span><br><span class="line"><span class="comment">**********************************************************************/</span></span><br><span class="line">Ivar *</span><br><span class="line">class_copyIvarList(Class cls, <span class="keyword">unsigned</span> <span class="keyword">int</span> *outCount)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">ivar_list_t</span> *ivars;</span><br><span class="line">    Ivar *result = nil;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!cls) &#123;</span><br><span class="line">        <span class="keyword">if</span> (outCount) *outCount = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">return</span> nil;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">mutex_locker_t</span> lock(runtimeLock);</span><br><span class="line"></span><br><span class="line">    ASSERT(cls-&gt;isRealized());</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> ((ivars = cls-&gt;data()-&gt;ro-&gt;ivars)  &amp;&amp;  ivars-&gt;count) &#123;</span><br><span class="line">        result = (Ivar *)<span class="built_in">malloc</span>((ivars-&gt;count+<span class="number">1</span>) * <span class="keyword">sizeof</span>(Ivar));</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span>&amp; ivar : *ivars) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!ivar.offset) <span class="keyword">continue</span>;  <span class="comment">// anonymous bitfield</span></span><br><span class="line">            result[count++] = &amp;ivar;</span><br><span class="line">        &#125;</span><br><span class="line">        result[count] = nil;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (outCount) *outCount = count;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​    从runtime源码中可以看到，成员变量列表是从<em>cls-&gt;data()-&gt;ro-&gt;ivars</em>中获得。    runtime源码中可以看到class在remap时从DATA Segment，__objc_classlist Section中读取来的，在class初始化之前的data返回的是ro，初始化完成之后才重新开辟一块内存作为rw，ro涵盖了类的所有初始信息初始化信息，类的成员变量、方法列表、协议等等。所以ivars在编译结束之后就是确定的。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GETSECT(_getObjc2ClassList,           <span class="keyword">classref_t</span> <span class="keyword">const</span>,      <span class="string">"__objc_classlist"</span>);</span><br></pre></td></tr></table></figure>
+<p>​    再来看一下ro的结构：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">class_ro_t</span> &#123;</span></span><br><span class="line">    <span class="keyword">uint32_t</span> flags;</span><br><span class="line">    <span class="keyword">uint32_t</span> instanceStart;</span><br><span class="line">    <span class="keyword">uint32_t</span> instanceSize;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> __LP64__</span></span><br><span class="line">    <span class="keyword">uint32_t</span> reserved;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">uint8_t</span> * ivarLayout;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> * name;</span><br><span class="line">    <span class="keyword">method_list_t</span> * baseMethodList;</span><br><span class="line">    <span class="keyword">protocol_list_t</span> * baseProtocols;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">ivar_list_t</span> * ivars;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">uint8_t</span> * weakIvarLayout;</span><br><span class="line">    <span class="keyword">property_list_t</span> *baseProperties;</span><br><span class="line">		...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<hr>
+<h4 id="Ivar结构"><a href="#Ivar结构" class="headerlink" title="Ivar结构"></a>Ivar结构</h4><p>​    再回到成员变量这里，先看一下ivar的结构，offset表示的是成员变量在实例中的偏移量，通过计算偏移量就能找到类实例中成员变量的位置，继而读取变量的内容。name、type、size都表示着变量的基本信息。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ivar_t</span> &#123;</span></span><br><span class="line">    <span class="keyword">int32_t</span> *offset;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> *name;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> *type;</span><br><span class="line">    <span class="comment">// alignment is sometimes -1; use alignment() instead</span></span><br><span class="line">    <span class="keyword">uint32_t</span> alignment_raw;</span><br><span class="line">    <span class="keyword">uint32_t</span> size;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">uint32_t</span> alignment() <span class="keyword">const</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (alignment_raw == ~(<span class="keyword">uint32_t</span>)<span class="number">0</span>) <span class="keyword">return</span> <span class="number">1U</span> &lt;&lt; WORD_SHIFT;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span> &lt;&lt; alignment_raw;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>​    因为class_copyIvarList只返回了当前类声明的成员变量，那父类的成员变量又如何访问？上面说明了如何通过ivar的偏移量来访问类实例的变量。那猜想类实例的数据结构如下：</p>
+<blockquote>
+<p>| 父类 Ivars|</p>
+<p>| 子类 Ivars|</p>
+</blockquote>
+<p>​    类实例的变量排布大概是先排列父类的变量，然后子类的变量从父类之后排列。由此也可以理解子类的ivars中不会有父类的成员变量。父类的成员变量的偏移量是确定的，子类的成员变量继父类之后排列，也就不会出现内存重叠的问题。</p>
+<hr>
+<h4 id="在实现中直接访问成员变量，编译器是如何处理的"><a href="#在实现中直接访问成员变量，编译器是如何处理的" class="headerlink" title="在实现中直接访问成员变量，编译器是如何处理的"></a>在实现中直接访问成员变量，编译器是如何处理的</h4><p>​    在代码实现中，类中声明的成员变量，我们可以直接通过下划线来访问变量。那系统是如何实现变量访问的呢？（以下为clang重写后的代码）</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">	在.m文件中重写了name的setter，简单的_name=name；</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> _I_Human_setName_(Human * self, SEL _cmd, NSString * _Nonnull name) &#123;</span><br><span class="line">    (*(NSString * _Nonnull *)((<span class="keyword">char</span> *)self + OBJC_IVAR_$_Human$_name)) = name;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​    从代码中可以看到，预处理后的成员变量的访问直接通过偏移量计算来实现。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/04/04/iOS超级签名/" rel="next" title="iOS ipa超级签名">
+                <i class="fa fa-chevron-left"></i> iOS ipa超级签名
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Jin.</p>
+              <p class="site-description motion-element" itemprop="description">知其然知其所以然！</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#获取类的成员变量"><span class="nav-number">1.</span> <span class="nav-text">获取类的成员变量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Ivar结构"><span class="nav-number">2.</span> <span class="nav-text">Ivar结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在实现中直接访问成员变量，编译器是如何处理的"><span class="nav-number">3.</span> <span class="nav-text">在实现中直接访问成员变量，编译器是如何处理的</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jin.</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

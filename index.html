@@ -232,6 +232,145 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/04/12/深入理解Ivar/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jin.">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一只代码狗的随笔">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/04/12/深入理解Ivar/" itemprop="url">深入理解Ivar</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-04-12T21:28:59+08:00">
+                2020-04-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>​    ivar是类中的成员变量，@propery声明一个属性的时候就会产生一个成员变量。</p>
+<h4 id="获取类的成员变量"><a href="#获取类的成员变量" class="headerlink" title="获取类的成员变量"></a>获取类的成员变量</h4><p>​    在runtime中，通过class_copyIvarList(Class cls, unsigned int * outCount)函数可以获取类的成员变量列表。在这里需要注意的是，class_copyIvarList函数获取的是当前类声明的成员变量，它的父类声明的 成员变量并不会返回。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/***********************************************************************</span></span><br><span class="line"><span class="comment">* class_copyIvarList</span></span><br><span class="line"><span class="comment">* fixme</span></span><br><span class="line"><span class="comment">* Locking: read-locks runtimeLock</span></span><br><span class="line"><span class="comment">**********************************************************************/</span></span><br><span class="line">Ivar *</span><br><span class="line">class_copyIvarList(Class cls, <span class="keyword">unsigned</span> <span class="keyword">int</span> *outCount)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">ivar_list_t</span> *ivars;</span><br><span class="line">    Ivar *result = nil;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!cls) &#123;</span><br><span class="line">        <span class="keyword">if</span> (outCount) *outCount = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">return</span> nil;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">mutex_locker_t</span> lock(runtimeLock);</span><br><span class="line"></span><br><span class="line">    ASSERT(cls-&gt;isRealized());</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> ((ivars = cls-&gt;data()-&gt;ro-&gt;ivars)  &amp;&amp;  ivars-&gt;count) &#123;</span><br><span class="line">        result = (Ivar *)<span class="built_in">malloc</span>((ivars-&gt;count+<span class="number">1</span>) * <span class="keyword">sizeof</span>(Ivar));</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span>&amp; ivar : *ivars) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!ivar.offset) <span class="keyword">continue</span>;  <span class="comment">// anonymous bitfield</span></span><br><span class="line">            result[count++] = &amp;ivar;</span><br><span class="line">        &#125;</span><br><span class="line">        result[count] = nil;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (outCount) *outCount = count;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​    从runtime源码中可以看到，成员变量列表是从<em>cls-&gt;data()-&gt;ro-&gt;ivars</em>中获得。    runtime源码中可以看到class在remap时从DATA Segment，__objc_classlist Section中读取来的，在class初始化之前的data返回的是ro，初始化完成之后才重新开辟一块内存作为rw，ro涵盖了类的所有初始信息初始化信息，类的成员变量、方法列表、协议等等。所以ivars在编译结束之后就是确定的。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GETSECT(_getObjc2ClassList,           <span class="keyword">classref_t</span> <span class="keyword">const</span>,      <span class="string">"__objc_classlist"</span>);</span><br></pre></td></tr></table></figure>
+<p>​    再来看一下ro的结构：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">class_ro_t</span> &#123;</span></span><br><span class="line">    <span class="keyword">uint32_t</span> flags;</span><br><span class="line">    <span class="keyword">uint32_t</span> instanceStart;</span><br><span class="line">    <span class="keyword">uint32_t</span> instanceSize;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> __LP64__</span></span><br><span class="line">    <span class="keyword">uint32_t</span> reserved;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">uint8_t</span> * ivarLayout;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> * name;</span><br><span class="line">    <span class="keyword">method_list_t</span> * baseMethodList;</span><br><span class="line">    <span class="keyword">protocol_list_t</span> * baseProtocols;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">ivar_list_t</span> * ivars;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">uint8_t</span> * weakIvarLayout;</span><br><span class="line">    <span class="keyword">property_list_t</span> *baseProperties;</span><br><span class="line">		...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<hr>
+<h4 id="Ivar结构"><a href="#Ivar结构" class="headerlink" title="Ivar结构"></a>Ivar结构</h4><p>​    再回到成员变量这里，先看一下ivar的结构，offset表示的是成员变量在实例中的偏移量，通过计算偏移量就能找到类实例中成员变量的位置，继而读取变量的内容。name、type、size都表示着变量的基本信息。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ivar_t</span> &#123;</span></span><br><span class="line">    <span class="keyword">int32_t</span> *offset;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> *name;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> *type;</span><br><span class="line">    <span class="comment">// alignment is sometimes -1; use alignment() instead</span></span><br><span class="line">    <span class="keyword">uint32_t</span> alignment_raw;</span><br><span class="line">    <span class="keyword">uint32_t</span> size;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">uint32_t</span> alignment() <span class="keyword">const</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (alignment_raw == ~(<span class="keyword">uint32_t</span>)<span class="number">0</span>) <span class="keyword">return</span> <span class="number">1U</span> &lt;&lt; WORD_SHIFT;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span> &lt;&lt; alignment_raw;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>​    因为class_copyIvarList只返回了当前类声明的成员变量，那父类的成员变量又如何访问？上面说明了如何通过ivar的偏移量来访问类实例的变量。那猜想类实例的数据结构如下：</p>
+<blockquote>
+<p>| 父类 Ivars|</p>
+<p>| 子类 Ivars|</p>
+</blockquote>
+<p>​    类实例的变量排布大概是先排列父类的变量，然后子类的变量从父类之后排列。由此也可以理解子类的ivars中不会有父类的成员变量。父类的成员变量的偏移量是确定的，子类的成员变量继父类之后排列，也就不会出现内存重叠的问题。</p>
+<hr>
+<h4 id="在实现中直接访问成员变量，编译器是如何处理的"><a href="#在实现中直接访问成员变量，编译器是如何处理的" class="headerlink" title="在实现中直接访问成员变量，编译器是如何处理的"></a>在实现中直接访问成员变量，编译器是如何处理的</h4><p>​    在代码实现中，类中声明的成员变量，我们可以直接通过下划线来访问变量。那系统是如何实现变量访问的呢？（以下为clang重写后的代码）</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">	在.m文件中重写了name的setter，简单的_name=name；</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> _I_Human_setName_(Human * self, SEL _cmd, NSString * _Nonnull name) &#123;</span><br><span class="line">    (*(NSString * _Nonnull *)((<span class="keyword">char</span> *)self + OBJC_IVAR_$_Human$_name)) = name;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​    从代码中可以看到，预处理后的成员变量的访问直接通过偏移量计算来实现。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/04/04/iOS超级签名/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1370,132 +1509,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/15/iOS和H5图片数据交互方案/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Jin.">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="一只代码狗的随笔">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/06/15/iOS和H5图片数据交互方案/" itemprop="url">iOS和H5图片数据交互方案</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-15T17:13:09+08:00">
-                2019-06-15
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="需求场景"><a href="#需求场景" class="headerlink" title="需求场景"></a>需求场景</h2><p>H5页面使用客户端的相册图片。H5调用客户端的相册功能选取图片，图片资源在客户端本地，因此需要客户端将选取后的图片数据返回给H5。</p>
-<h2 id="方案设计"><a href="#方案设计" class="headerlink" title="方案设计"></a>方案设计</h2><h4 id="一、直接通过桥将数据传给H5应用"><a href="#一、直接通过桥将数据传给H5应用" class="headerlink" title="一、直接通过桥将数据传给H5应用"></a>一、直接通过桥将数据传给H5应用</h4><p>将获取的UIImage对象转化为NSData对象，通过桥，直接将NSData对象传给H5应用。</p>
-<h4 id="二、拦截H5的网络请求，将图片数据通过网络请求的方式返回给H5应用"><a href="#二、拦截H5的网络请求，将图片数据通过网络请求的方式返回给H5应用" class="headerlink" title="二、拦截H5的网络请求，将图片数据通过网络请求的方式返回给H5应用"></a>二、拦截H5的网络请求，将图片数据通过网络请求的方式返回给H5应用</h4><p>客户端图片选取之后，生成一个图片地址，地址中包含特定的图片协议和这个图片的唯一标识符。图片地址返回给H5应用，H5应用取得图片地址后，将图片地址视为一个网络图片地址，通过request请求图片数据。客户端通过NSURLProtocol拦截WebView发起的包含特定图片协议的网络请求，并根据请求的地址匹配本地的图片资源，生成response返回给H5应用。客户端在请求过程中扮演一个本地服务器的角色。<br><img src="https://raw.githubusercontent.com/shiroJin/image-storage/master/iOS%E5%92%8CH5%E5%9B%BE%E7%89%87%E4%BA%A4%E4%BA%92%E6%96%B9%E6%A1%88_1.png"></p>
-<h2 id="缓存设计"><a href="#缓存设计" class="headerlink" title="缓存设计"></a>缓存设计</h2><p>相册选择完图片后，已经获取到了图片数据，对应的图片数据进行缓存，提高读取效率。获取到的UIImage对象转化为NSData数据存储在缓存池中，缓存池的结构为简单的hash表。</p>
-<h3 id="拦截器实现"><a href="#拦截器实现" class="headerlink" title="拦截器实现"></a>拦截器实现</h3><p>iOS中系统提供了请求的拦截器——NSURLProtocol。子类化NSURLProtocol类，并注册这个urlProtocol即可拦截到当前进程的网络请求。但在 WKWebView 中的请求却完全不遵从这一规则，WKWebView有自己独立的进程，通过IPC进行进程间通信。想要拦截WKWebView的请求则需要通过c类的registerSchemeForCustomProtocol:方法进行注册urlProtocol(WKBrowsingContextController是私有类，只能通过runtime的方式生成获取这个类，且iOS 8.4 以后才被引入，调用私有类和私有方法存在被拒的隐患)。</p>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 注册protocol scheme为自定义的protocol。</span></span><br><span class="line">Class cls = [[[<span class="built_in">WKWebView</span> new] valueForKey:<span class="string">@"browsingContextController"</span>] <span class="keyword">class</span>];</span><br><span class="line">SEL sel = <span class="built_in">NSSelectorFromString</span>(<span class="string">@"registerSchemeForCustomProtocol:"</span>);</span><br><span class="line"><span class="keyword">if</span> ([(<span class="keyword">id</span>)cls respondsToSelector:sel]) &#123;</span><br><span class="line">	[(<span class="keyword">id</span>)cls performSelector:sel withObject:scheme];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="降级方案"><a href="#降级方案" class="headerlink" title="降级方案"></a>降级方案</h3><p>对于iOS 8.4 以下的版本，无法获取到WKBrowsingContextController类，也就导致无法进行网络拦截。在整个图片选择逻辑中，APP通过桥传输的都是图片的地址。H5应用都是直接加载图片地址的数据。因此，对于iOS 8.4以下的版本，APP端不作本地服务器，选择完图片后自行传到远程服务器，将正常的网络图片地址传给H5应用。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1546,7 +1559,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-count">19</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
