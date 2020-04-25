@@ -79,19 +79,19 @@
 
 
 
-<meta name="description" content="一个c语言编写的文件，需要经过以下四个步骤最后才能成为一个可执行文件。  预处理 编译 汇编 链接  ​    可以简单的理解为1-3步骤是对代码语言的处理，将高级语言译成机器可以识别的机器语言。步骤4是将每个编译后的文件整合为一个完整的可执行文件，链接的实质是将符号和定义联系在一起。">
+<meta name="description" content="一个c语言编写的文件，需要经过以下四个步骤最后才能成为一个可执行文件。  预处理 编译 汇编 链接  ​    可以简单的理解为1-3步骤是对代码语言的处理，将高级语言译成机器可以识别的机器语言。步骤4是将每个编译后的文件整合为一个完整的可执行文件，链接的实质是将符号和定义联系在一起。 ELF结构: ​    下表为ELF文件主体结构，每个ELF文件都是由多个段组成的，一些复杂的elf文件会涵盖很">
 <meta property="og:type" content="article">
 <meta property="og:title" content="初识链接器">
 <meta property="og:url" content="http://yoursite.com/2019/08/18/初识链接器/index.html">
 <meta property="og:site_name" content="一只代码狗的随笔">
-<meta property="og:description" content="一个c语言编写的文件，需要经过以下四个步骤最后才能成为一个可执行文件。  预处理 编译 汇编 链接  ​    可以简单的理解为1-3步骤是对代码语言的处理，将高级语言译成机器可以识别的机器语言。步骤4是将每个编译后的文件整合为一个完整的可执行文件，链接的实质是将符号和定义联系在一起。">
+<meta property="og:description" content="一个c语言编写的文件，需要经过以下四个步骤最后才能成为一个可执行文件。  预处理 编译 汇编 链接  ​    可以简单的理解为1-3步骤是对代码语言的处理，将高级语言译成机器可以识别的机器语言。步骤4是将每个编译后的文件整合为一个完整的可执行文件，链接的实质是将符号和定义联系在一起。 ELF结构: ​    下表为ELF文件主体结构，每个ELF文件都是由多个段组成的，一些复杂的elf文件会涵盖很">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="https://raw.githubusercontent.com/shiroJin/image-storage/master/linker_1.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/shiroJin/image-storage/master/linker_2.png">
-<meta property="og:updated_time" content="2020-01-22T06:04:15.845Z">
+<meta property="og:updated_time" content="2020-04-25T13:27:12.888Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="初识链接器">
-<meta name="twitter:description" content="一个c语言编写的文件，需要经过以下四个步骤最后才能成为一个可执行文件。  预处理 编译 汇编 链接  ​    可以简单的理解为1-3步骤是对代码语言的处理，将高级语言译成机器可以识别的机器语言。步骤4是将每个编译后的文件整合为一个完整的可执行文件，链接的实质是将符号和定义联系在一起。">
+<meta name="twitter:description" content="一个c语言编写的文件，需要经过以下四个步骤最后才能成为一个可执行文件。  预处理 编译 汇编 链接  ​    可以简单的理解为1-3步骤是对代码语言的处理，将高级语言译成机器可以识别的机器语言。步骤4是将每个编译后的文件整合为一个完整的可执行文件，链接的实质是将符号和定义联系在一起。 ELF结构: ​    下表为ELF文件主体结构，每个ELF文件都是由多个段组成的，一些复杂的elf文件会涵盖很">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/shiroJin/image-storage/master/linker_1.png">
 
 
@@ -309,9 +309,9 @@
 <li>汇编</li>
 <li>链接</li>
 </ol>
-<p>​    可以简单的理解为1-3步骤是对代码语言的处理，将高级语言译成机器可以识别的机器语言。步骤4是将每个编译后的文件整合为一个完整的可执行文件，链接的实质是将符号和定义联系在一起。<br><a id="more"></a></p>
+<p>​    可以简单的理解为1-3步骤是对代码语言的处理，将高级语言译成机器可以识别的机器语言。步骤4是将每个编译后的文件整合为一个完整的可执行文件，链接的实质是将符号和定义联系在一起。</p>
 <p><strong>ELF结构:</strong></p>
-<p>​    下表为ELF文件主体结构，每个ELF文件都是由多个段组成的，一些复杂的elf文件会涵盖很多不同的段，一些简单的ELF文件可能只包括少数的段。这些都是由代码中数据决定的。</p>
+<p>​    下表为ELF文件主体结构，每个ELF文件都是由多个段组成的，一些复杂的elf文件会涵盖很多不同的段，一些简单的ELF文件可能只包括少数的段。这些都是由代码中数据决定的。<a id="more"></a></p>
 <table>
 <thead>
 <tr>

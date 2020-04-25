@@ -232,7 +232,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/04/12/深入理解Ivar/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/04/12/Ivar和类实例的内存分布/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Jin.">
@@ -251,7 +251,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/04/12/深入理解Ivar/" itemprop="url">深入理解Ivar</a></h1>
+                <a class="post-title-link" href="/2020/04/12/Ivar和类实例的内存分布/" itemprop="url">Ivar和类实例的内存分布</a></h1>
         
 
         <div class="post-meta">
@@ -302,29 +302,15 @@
 
       
         
-          
-            <p>​    ivar是类中的成员变量，@propery声明一个属性的时候就会产生一个成员变量。</p>
-<h4 id="获取类的成员变量"><a href="#获取类的成员变量" class="headerlink" title="获取类的成员变量"></a>获取类的成员变量</h4><p>​    在runtime中，通过class_copyIvarList(Class cls, unsigned int * outCount)函数可以获取类的成员变量列表。在这里需要注意的是，class_copyIvarList函数获取的是当前类声明的成员变量，它的父类声明的 成员变量并不会返回。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/***********************************************************************</span></span><br><span class="line"><span class="comment">* class_copyIvarList</span></span><br><span class="line"><span class="comment">* fixme</span></span><br><span class="line"><span class="comment">* Locking: read-locks runtimeLock</span></span><br><span class="line"><span class="comment">**********************************************************************/</span></span><br><span class="line">Ivar *</span><br><span class="line">class_copyIvarList(Class cls, <span class="keyword">unsigned</span> <span class="keyword">int</span> *outCount)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">ivar_list_t</span> *ivars;</span><br><span class="line">    Ivar *result = nil;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!cls) &#123;</span><br><span class="line">        <span class="keyword">if</span> (outCount) *outCount = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">return</span> nil;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">mutex_locker_t</span> lock(runtimeLock);</span><br><span class="line"></span><br><span class="line">    ASSERT(cls-&gt;isRealized());</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> ((ivars = cls-&gt;data()-&gt;ro-&gt;ivars)  &amp;&amp;  ivars-&gt;count) &#123;</span><br><span class="line">        result = (Ivar *)<span class="built_in">malloc</span>((ivars-&gt;count+<span class="number">1</span>) * <span class="keyword">sizeof</span>(Ivar));</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span>&amp; ivar : *ivars) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!ivar.offset) <span class="keyword">continue</span>;  <span class="comment">// anonymous bitfield</span></span><br><span class="line">            result[count++] = &amp;ivar;</span><br><span class="line">        &#125;</span><br><span class="line">        result[count] = nil;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (outCount) *outCount = count;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>​    从runtime源码中可以看到，成员变量列表是从<em>cls-&gt;data()-&gt;ro-&gt;ivars</em>中获得。    runtime源码中可以看到class在remap时从DATA Segment，__objc_classlist Section中读取来的，在class初始化之前的data返回的是ro，初始化完成之后才重新开辟一块内存作为rw，ro涵盖了类的所有初始信息初始化信息，类的成员变量、方法列表、协议等等。所以ivars在编译结束之后就是确定的。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GETSECT(_getObjc2ClassList,           <span class="keyword">classref_t</span> <span class="keyword">const</span>,      <span class="string">"__objc_classlist"</span>);</span><br></pre></td></tr></table></figure>
-<p>​    再来看一下ro的结构：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">class_ro_t</span> &#123;</span></span><br><span class="line">    <span class="keyword">uint32_t</span> flags;</span><br><span class="line">    <span class="keyword">uint32_t</span> instanceStart;</span><br><span class="line">    <span class="keyword">uint32_t</span> instanceSize;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> __LP64__</span></span><br><span class="line">    <span class="keyword">uint32_t</span> reserved;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">uint8_t</span> * ivarLayout;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> * name;</span><br><span class="line">    <span class="keyword">method_list_t</span> * baseMethodList;</span><br><span class="line">    <span class="keyword">protocol_list_t</span> * baseProtocols;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">ivar_list_t</span> * ivars;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">uint8_t</span> * weakIvarLayout;</span><br><span class="line">    <span class="keyword">property_list_t</span> *baseProperties;</span><br><span class="line">		...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<hr>
-<h4 id="Ivar结构"><a href="#Ivar结构" class="headerlink" title="Ivar结构"></a>Ivar结构</h4><p>​    再回到成员变量这里，先看一下ivar的结构，offset表示的是成员变量在实例中的偏移量，通过计算偏移量就能找到类实例中成员变量的位置，继而读取变量的内容。name、type、size都表示着变量的基本信息。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ivar_t</span> &#123;</span></span><br><span class="line">    <span class="keyword">int32_t</span> *offset;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> *name;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> *type;</span><br><span class="line">    <span class="comment">// alignment is sometimes -1; use alignment() instead</span></span><br><span class="line">    <span class="keyword">uint32_t</span> alignment_raw;</span><br><span class="line">    <span class="keyword">uint32_t</span> size;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">uint32_t</span> alignment() <span class="keyword">const</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (alignment_raw == ~(<span class="keyword">uint32_t</span>)<span class="number">0</span>) <span class="keyword">return</span> <span class="number">1U</span> &lt;&lt; WORD_SHIFT;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span> &lt;&lt; alignment_raw;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<p>​    因为class_copyIvarList只返回了当前类声明的成员变量，那父类的成员变量又如何访问？上面说明了如何通过ivar的偏移量来访问类实例的变量。那猜想类实例的数据结构如下：</p>
-<blockquote>
-<p>| 父类 Ivars|</p>
-<p>| 子类 Ivars|</p>
-</blockquote>
-<p>​    类实例的变量排布大概是先排列父类的变量，然后子类的变量从父类之后排列。由此也可以理解子类的ivars中不会有父类的成员变量。父类的成员变量的偏移量是确定的，子类的成员变量继父类之后排列，也就不会出现内存重叠的问题。</p>
-<hr>
-<h4 id="在实现中直接访问成员变量，编译器是如何处理的"><a href="#在实现中直接访问成员变量，编译器是如何处理的" class="headerlink" title="在实现中直接访问成员变量，编译器是如何处理的"></a>在实现中直接访问成员变量，编译器是如何处理的</h4><p>​    在代码实现中，类中声明的成员变量，我们可以直接通过下划线来访问变量。那系统是如何实现变量访问的呢？（以下为clang重写后的代码）</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">	在.m文件中重写了name的setter，简单的_name=name；</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> _I_Human_setName_(Human * self, SEL _cmd, NSString * _Nonnull name) &#123;</span><br><span class="line">    (*(NSString * _Nonnull *)((<span class="keyword">char</span> *)self + OBJC_IVAR_$_Human$_name)) = name;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>​    从代码中可以看到，预处理后的成员变量的访问直接通过偏移量计算来实现。</p>
-
-          
+          <p>​    ivar是类中的成员变量，@propery声明一个属性的时候就会产生一个成员变量。</p>
+<h4 id="获取类的成员变量"><a href="#获取类的成员变量" class="headerlink" title="获取类的成员变量"></a>获取类的成员变量</h4><p>​    在runtime中，通过class_copyIvarList(Class cls, unsigned int * outCount)函数可以获取类的成员变量列表。在这里需要注意的是，class_copyIvarList函数获取的是当前类声明的成员变量，它的父类声明的 成员变量并不会返回。
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/04/12/Ivar和类实例的内存分布/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -442,7 +428,6 @@
       
         
           <p>​    由于对外分外的adhoc包只能安装在provisioning profile中已添加的设备。因此当有新设备添加时，需要单独更新provisioning profile，并对包进行一次重签名。针对新设备包更新的问题，对超级签名的方案进行了调研。</p>
-<hr>
 <h4 id="方案概述"><a href="#方案概述" class="headerlink" title="方案概述"></a>方案概述</h4><p>​    超级签名主要思路是让需要安装包的设备自行触发设备添加和重签名的操作，下图为超级签名的签名流程。
           <!--noindex-->
           <div class="post-button text-center">
@@ -1086,7 +1071,9 @@
 <li>汇编</li>
 <li>链接</li>
 </ol>
-<p>​    可以简单的理解为1-3步骤是对代码语言的处理，将高级语言译成机器可以识别的机器语言。步骤4是将每个编译后的文件整合为一个完整的可执行文件，链接的实质是将符号和定义联系在一起。<br>
+<p>​    可以简单的理解为1-3步骤是对代码语言的处理，将高级语言译成机器可以识别的机器语言。步骤4是将每个编译后的文件整合为一个完整的可执行文件，链接的实质是将符号和定义联系在一起。</p>
+<p><strong>ELF结构:</strong></p>
+<p>​    下表为ELF文件主体结构，每个ELF文件都是由多个段组成的，一些复杂的elf文件会涵盖很多不同的段，一些简单的ELF文件可能只包括少数的段。这些都是由代码中数据决定的。
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2019/08/18/初识链接器/#more" rel="contents">
