@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.12.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="​	LLDB是个开源的内置于XCode的具有REPL(read-eval-print-loop)特征的Debugger，也是iOS开发中，配合断点使用的调试命令工具。 基本操作命令​	在lldb中输入help能看到所有的命令，通过help 可以看到相应命令的具体用法。以下介绍几种常用的命令。  打印输出   p         – Evaluate an expression on the cur">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LLDB断点调试">
+<meta property="og:url" content="http://example.com/2019/03/15/lldb%E6%96%AD%E7%82%B9%E8%B0%83%E8%AF%95/index.html">
+<meta property="og:site_name" content="一只代码狗的随笔">
+<meta property="og:description" content="​	LLDB是个开源的内置于XCode的具有REPL(read-eval-print-loop)特征的Debugger，也是iOS开发中，配合断点使用的调试命令工具。 基本操作命令​	在lldb中输入help能看到所有的命令，通过help 可以看到相应命令的具体用法。以下介绍几种常用的命令。  打印输出   p         – Evaluate an expression on the cur">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-03-15T07:00:00.000Z">
+<meta property="article:modified_time" content="2019-03-15T07:00:00.000Z">
+<meta property="article:author" content="Jin.">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2019/03/15/lldb%E6%96%AD%E7%82%B9%E8%B0%83%E8%AF%95/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://example.com/2019/03/15/lldb%E6%96%AD%E7%82%B9%E8%B0%83%E8%AF%95/","path":"2019/03/15/lldb断点调试/","title":"LLDB断点调试"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>LLDB断点调试 | 一只代码狗的随笔</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">一只代码狗的随笔</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">知其然知其所以然！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C%E5%91%BD%E4%BB%A4"><span class="nav-number">1.</span> <span class="nav-text">基本操作命令</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jin.</p>
+  <div class="site-description" itemprop="description">知其然知其所以然！</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2019/03/15/lldb%E6%96%AD%E7%82%B9%E8%B0%83%E8%AF%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jin.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一只代码狗的随笔">
+      <meta itemprop="description" content="知其然知其所以然！">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="LLDB断点调试 | 一只代码狗的随笔">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          LLDB断点调试
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2019-03-15 15:00:00" itemprop="dateCreated datePublished" datetime="2019-03-15T15:00:00+08:00">2019-03-15</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>​	LLDB是个开源的内置于XCode的具有REPL(read-eval-print-loop)特征的Debugger，也是iOS开发中，配合断点使用的调试命令工具。</p>
+<h4 id="基本操作命令"><a href="#基本操作命令" class="headerlink" title="基本操作命令"></a>基本操作命令</h4><p>​	在lldb中输入help能看到所有的命令，通过help <command>可以看到相应命令的具体用法。以下介绍几种常用的命令。</p>
+<ul>
+<li>打印输出</li>
+</ul>
+<blockquote>
+<p>p         – Evaluate an expression on the current thread.  Displays any</p>
+<p>​               returned value with LLDB’s default formatting.</p>
+<p>po        – Evaluate an expression on the current thread.  Displays any</p>
+<p>​               returned value with formatting controlled by the type’s author.</p>
+</blockquote>
+<p>p和po两个命令是日常打印输出最常用的。po，p是expression的缩写。在命令行中输入help po，可以看到po和p命令的详细信息，</p>
+<p><code> &#39;po&#39; is an abbreviation for &#39;expression -O  —&#39;，</code></p>
+<p><code> &#39;p&#39; is an abbreviation for &#39;expression —&#39;</code></p>
+<p>po输出的是对象的description方法的返回值，也可以重写对象的description方法来改变输出。而p输出的是LLDB的默认格式。例如下图NSArray的打印输出。po和p命令同时也能执行代码。根接下来的expr命令功能相同。</p>
+<ul>
+<li>动态执行代码</li>
+</ul>
+<blockquote>
+<p>expression        – Evaluate an expression on the current thread.  Displays<br>                       any returned value with LLDB’s default formatting.</p>
+</blockquote>
+<p>expr命令可以执行输入的代码块(call命令的效果相同，都是调用__lldb_expr函数)。通过输入的代码块，我们可以动态的改变变量的值，可以调用一个方法…。使用Option+Enter键可以输入多行代码。</p>
+<p>如上图，动态的执行obj&#x3D;nil这段代码，将obj的值置为nil。需要补充的是，expr命令接收的代码不能直接使用枚举值，例如NSRoundUp需要转化为(NSRoundingMode)1。此外，expr命令不能执行return value。</p>
+<blockquote>
+<p>display   – Evaluate an expression at every stop (see ‘help target<br>               stop-hook’.)</p>
+</blockquote>
+<p>display作用的与expr相同，都是执行一段代码，而display命令在每一次到断点的时候都会执行一遍输入的代码。</p>
+<ul>
+<li>查看堆栈信息</li>
+</ul>
+<blockquote>
+<p><strong>(lldb)</strong> <strong>help bt</strong></p>
+<p>​     —Show the current thread’s call stack.  Any numeric argument displays at</p>
+<p>​     most that many frames.  The argument ‘all’ displays all threads.  Expects</p>
+<p>​     ‘raw’ input (see ‘help raw-input’.)</p>
+<p>Syntax: bt [<digit> | all]</p>
+<p>‘bt’ is an abbreviation for ‘_regexp-bt’</p>
+</blockquote>
+<p>​	此外，在lldb中只要获取到对象的地址，就能使用expr，call命令调用对象的方法。因为，oc是方法的调用都是msg_send函数。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/09/09/iOS%20Crash%20Catch/" rel="prev" title="iOS Crash Catch">
+                  <i class="fa fa-chevron-left"></i> iOS Crash Catch
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2019/03/31/%E7%BA%A6%E6%9D%9F%E4%BC%98%E5%85%88%E7%BA%A7%E7%9A%84%E4%BD%BF%E7%94%A8/" rel="next" title="约束优先级的使用">
+                  约束优先级的使用 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jin.</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

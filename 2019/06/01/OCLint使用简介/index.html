@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.12.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="OCLint是iOS中代码质量控制的工具，支持自定义规则，适用于团队协作开发，规范代码。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OCLint使用简介">
+<meta property="og:url" content="http://example.com/2019/06/01/OCLint%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/index.html">
+<meta property="og:site_name" content="一只代码狗的随笔">
+<meta property="og:description" content="OCLint是iOS中代码质量控制的工具，支持自定义规则，适用于团队协作开发，规范代码。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://docs.oclint.org/en/stable/_images/xcode_screenshot_1.png">
+<meta property="og:image" content="http://docs.oclint.org/en/stable/_images/xcode_screenshot_4.png">
+<meta property="og:image" content="http://docs.oclint.org/en/stable/_images/xcode_screenshot_8.png">
+<meta property="article:published_time" content="2019-06-01T05:00:00.000Z">
+<meta property="article:modified_time" content="2019-06-01T05:00:00.000Z">
+<meta property="article:author" content="Jin.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://docs.oclint.org/en/stable/_images/xcode_screenshot_1.png">
+
+
+<link rel="canonical" href="http://example.com/2019/06/01/OCLint%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://example.com/2019/06/01/OCLint%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/","path":"2019/06/01/OCLint使用简介/","title":"OCLint使用简介"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>OCLint使用简介 | 一只代码狗的随笔</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">一只代码狗的随笔</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">知其然知其所以然！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81OCLint-%E5%AE%89%E8%A3%85"><span class="nav-number">1.</span> <span class="nav-text">一、OCLint 安装</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Installing-OCLint"><span class="nav-number">1.0.1.</span> <span class="nav-text">Installing OCLint</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Updating-OCLint"><span class="nav-number">1.0.2.</span> <span class="nav-text">Updating OCLint</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Installation-Path"><span class="nav-number">1.0.3.</span> <span class="nav-text">Installation Path</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Finally"><span class="nav-number">1.0.4.</span> <span class="nav-text">Finally</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%9C%A8Xcode%E4%B8%AD%E4%BD%BF%E7%94%A8OCLint"><span class="nav-number">2.</span> <span class="nav-text">二、在Xcode中使用OCLint</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Setting-up-Target"><span class="nav-number">2.0.1.</span> <span class="nav-text">Setting up Target</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A1%A5%E5%85%85%EF%BC%9A"><span class="nav-number">2.0.1.1.</span> <span class="nav-text">补充：</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81OCLint%E9%80%89%E9%A1%B9%E9%85%8D%E7%BD%AE"><span class="nav-number">3.</span> <span class="nav-text">三、OCLint选项配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Customize-Rule-Thresholds"><span class="nav-number">3.0.1.</span> <span class="nav-text">Customize Rule Thresholds</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Select-OCLint-Rules-for-Inspection"><span class="nav-number">3.0.2.</span> <span class="nav-text">Select OCLint Rules for Inspection</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Pick-Up-the-Right-Reporter"><span class="nav-number">3.0.3.</span> <span class="nav-text">Pick Up the Right Reporter</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#oclint%E6%96%87%E4%BB%B6"><span class="nav-number">3.0.4.</span> <span class="nav-text">.oclint文件</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9B%E3%80%81OCLint%E9%83%A8%E5%88%86%E8%A7%84%E5%88%99"><span class="nav-number">3.1.</span> <span class="nav-text">四、OCLint部分规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E6%B6%88%E9%99%A4OCLint%E8%AD%A6%E5%91%8A"><span class="nav-number">3.2.</span> <span class="nav-text">五、消除OCLint警告</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jin.</p>
+  <div class="site-description" itemprop="description">知其然知其所以然！</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2019/06/01/OCLint%E4%BD%BF%E7%94%A8%E7%AE%80%E4%BB%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jin.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一只代码狗的随笔">
+      <meta itemprop="description" content="知其然知其所以然！">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="OCLint使用简介 | 一只代码狗的随笔">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OCLint使用简介
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2019-06-01 13:00:00" itemprop="dateCreated datePublished" datetime="2019-06-01T13:00:00+08:00">2019-06-01</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>OCLint是iOS中代码质量控制的工具，支持自定义规则，适用于团队协作开发，规范代码。</p>
+<span id="more"></span>
+
+<h2 id="一、OCLint-安装"><a href="#一、OCLint-安装" class="headerlink" title="一、OCLint 安装"></a>一、OCLint 安装</h2><p>macOS用户可以直接使用homebrew安装。</p>
+<h4 id="Installing-OCLint"><a href="#Installing-OCLint" class="headerlink" title="Installing OCLint"></a>Installing OCLint</h4><figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$ </span>brew tap oclint/formulae</span><br><span class="line"><span class="variable">$ </span>brew install oclint</span><br></pre></td></tr></table></figure>
+
+<h4 id="Updating-OCLint"><a href="#Updating-OCLint" class="headerlink" title="Updating OCLint"></a>Updating OCLint</h4><figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$ </span>brew update</span><br><span class="line"><span class="variable">$ </span>brew upgrade oclint</span><br></pre></td></tr></table></figure>
+
+<h4 id="Installation-Path"><a href="#Installation-Path" class="headerlink" title="Installation Path"></a>Installation Path</h4><p>安装路径使用brew命令查看</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$ </span>brew list oclint</span><br></pre></td></tr></table></figure>
+
+<h4 id="Finally"><a href="#Finally" class="headerlink" title="Finally"></a>Finally</h4><p>项目分析需要用到xcpretty工具。安装方式如下：</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$ </span>gem install xcpretty</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="二、在Xcode中使用OCLint"><a href="#二、在Xcode中使用OCLint" class="headerlink" title="二、在Xcode中使用OCLint"></a>二、在Xcode中使用OCLint</h2><h4 id="Setting-up-Target"><a href="#Setting-up-Target" class="headerlink" title="Setting up Target"></a>Setting up Target</h4><ul>
+<li>在项目中新增一个新的target，选择<b><kbd><font color="red">Aggregate</font></kbd></b>。<img src="http://docs.oclint.org/en/stable/_images/xcode_screenshot_1.png" width="70%" height="70%"></li>
+<li>给新的target命名。这里简单的命令为OCLint，你可以创建多个target，每个target在不同的方面对代码进行分析。</li>
+<li>在创建的target中选择<font color="Blue"><code>Build Phase</code></font>，新增Run Script，输入一段脚本，用于创建分析文件和分析使用。<img src="http://docs.oclint.org/en/stable/_images/xcode_screenshot_4.png" width="70%" height="70%"></li>
+<li><kbd><font color="Blue">Command+B</font></kbd>编译程序就可以看到分析结果了。<img src="http://docs.oclint.org/en/stable/_images/xcode_screenshot_8.png" width="70%" height="70%"></li>
+</ul>
+<h5 id="补充："><a href="#补充：" class="headerlink" title="补充："></a>补充：</h5><p>oclint-json-compilation-database命令有过滤项和配置两部分选项可以配置。过滤选项用于过滤一些不需要分析的文件或者文件夹，例如执行oclint-json-compilation-database -e Pod命令，就不会分析pod目录下的代码，-e支持链式使用，即可以过滤过个规则。过滤和配置两部分用符号<font color='blue'><code>--</code></font>分隔，下文会更详细的介绍oclint的选项配置。</p>
+<h2 id="三、OCLint选项配置"><a href="#三、OCLint选项配置" class="headerlink" title="三、OCLint选项配置"></a>三、OCLint选项配置</h2><h4 id="Customize-Rule-Thresholds"><a href="#Customize-Rule-Thresholds" class="headerlink" title="Customize Rule Thresholds"></a>Customize Rule Thresholds</h4><p>在使用<font color="Blue">oclint-json-compilation-database</font>命令的时候可以自定义规则临界值(即定义规则的参数)。在命令后面添加<kbd><font color="red">-rc <threshold_name>=<new_value></font></kbd>选项。多个自定义规则可以使用连续的-rc选项。如下：</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-rc &lt;threshold_name&gt;=&lt;new_value&gt; -rc &lt;threshold_name&gt;=&lt;new_value&gt;</span><br></pre></td></tr></table></figure>
+
+<p><b>Available Thresholds</b>	</p>
+<p>Here is a list of all thresholds defined in OCLint 0.13:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CYCLOMATIC_COMPLEXITY</td>
+<td>Cyclomatic complexity of a method</td>
+<td>10</td>
+</tr>
+<tr>
+<td>LONG_CLASS</td>
+<td>Number of lines for a C class or Objective-C interface, category, protocol, and implementation</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>LONG_LINE</td>
+<td>Number of characters for one line of code</td>
+<td>100</td>
+</tr>
+<tr>
+<td>LONG_METHOD</td>
+<td>Number of lines for a method or function</td>
+<td>50</td>
+</tr>
+<tr>
+<td>LONG_VARIABLE_NAME</td>
+<td>Number of characters for a variable name</td>
+<td>20</td>
+</tr>
+<tr>
+<td>MAXIMUM_IF_LENGTH</td>
+<td>Number of lines for the <code>if</code> block that would prefer an early exists</td>
+<td>15</td>
+</tr>
+<tr>
+<td>MINIMUM_CASES_IN_SWITCH</td>
+<td>Count of case statements in a switch statement</td>
+<td>3</td>
+</tr>
+<tr>
+<td>NPATH_COMPLEXITY</td>
+<td>NPath complexity of a method</td>
+<td>200</td>
+</tr>
+<tr>
+<td>NCSS_METHOD</td>
+<td>Number of non-commenting source statements of a method</td>
+<td>30</td>
+</tr>
+<tr>
+<td>NESTED_BLOCK_DEPTH</td>
+<td>Depth of a block or compound statement</td>
+<td>5</td>
+</tr>
+<tr>
+<td>SHORT_VARIABLE_NAME</td>
+<td>Number of characters for a variable name</td>
+<td>3</td>
+</tr>
+<tr>
+<td>TOO_MANY_FIELDS</td>
+<td>Number of fields of a class</td>
+<td>20</td>
+</tr>
+<tr>
+<td>TOO_MANY_METHODS</td>
+<td>Number of methods of a class</td>
+<td>30</td>
+</tr>
+<tr>
+<td>TOO_MANY_PARAMETERS</td>
+<td>Number of parameters of a method</td>
+<td>10</td>
+</tr>
+</tbody></table>
+<p><b>.oclint文件</b></p>
+<p>oclint还支持配置文件配置的方式。在工程项目下创建<font color="red">.oclint</font>文件。在文件中输入想要的选项即可达到命令行方式同样的效果。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">rule-configurations:</span><br><span class="line">  - key: THRESHOLD_1</span><br><span class="line">    value: new_value_1</span><br><span class="line">  - key: THRESHOLD_2</span><br><span class="line">    value: new_value_2</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure>
+
+<h4 id="Select-OCLint-Rules-for-Inspection"><a href="#Select-OCLint-Rules-for-Inspection" class="headerlink" title="Select OCLint Rules for Inspection"></a>Select OCLint Rules for Inspection</h4><p>在oclint的安装文件<kbd>${installation-path}/lib/oclint/rules</kbd>目录下可以看到oclint默认的分析规则。使用命令行可以指定或者过滤某条规则，命令如下：</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">oclint -R /path/to/rules -disable-rule GotoStatement</span><br></pre></td></tr></table></figure>
+
+<p>推荐使用<font color="blue">.oclint</font>配置文件。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">rule-paths:</span><br><span class="line">  - /path/to/rules</span><br><span class="line">rules:</span><br><span class="line">disable-rules:</span><br><span class="line">  - GotoStatement</span><br></pre></td></tr></table></figure>
+
+<h4 id="Pick-Up-the-Right-Reporter"><a href="#Pick-Up-the-Right-Reporter" class="headerlink" title="Pick Up the Right Reporter"></a>Pick Up the Right Reporter</h4><p>oclint现在支持多种输出方式。如果需要在代码中直接显示信息，<font color="blue">-report-type</font>设置为xcode。如果想要汇总输出，可以选择html格式。同样可以在<font color="blue">.oclint</font>配置文件中配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">report-type: html</span><br><span class="line">output: oclint.html	</span><br></pre></td></tr></table></figure>
+
+<p>html的文件输出可以直观的看到一个总览。效果如下：</p>
+<p>![screenshot](&#x2F;Users&#x2F;remain&#x2F;Library&#x2F;Group Containers&#x2F;Q79WDW8YH9.com.evernote.Evernote&#x2F;Evernote&#x2F;quick-note&#x2F;13630831-personal-app.yinxiang.com&#x2F;quick-note-nJN2un&#x2F;attachment–5mZIE6&#x2F;screenshot.png)</p>
+<h4 id="oclint文件"><a href="#oclint文件" class="headerlink" title=".oclint文件"></a>.oclint文件</h4><p>.oclint文件是oclint的配置文件，前面也有所提及。.oclint文件可以放在工程项目的根目录，也放在全局的文件路径下，例如<font color="blue">~&#x2F;.oclint </font>或 <font color="blue">&#x2F;etc&#x2F;.oclint</font>。这里详细的描述下有哪些选项可以配置。</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Mapping Command Option</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>rules</td>
+<td>List of strings</td>
+<td>-rule</td>
+</tr>
+<tr>
+<td>disable-rules</td>
+<td>List of strings</td>
+<td>-disable-rule</td>
+</tr>
+<tr>
+<td>rule-paths</td>
+<td>List of strings</td>
+<td>-R</td>
+</tr>
+<tr>
+<td>rule-configurations</td>
+<td>List of associative arrays</td>
+<td>-rc</td>
+</tr>
+<tr>
+<td>output</td>
+<td>String</td>
+<td>-o</td>
+</tr>
+<tr>
+<td>report-type</td>
+<td>String</td>
+<td>-report-type</td>
+</tr>
+<tr>
+<td>max-priority-1</td>
+<td>Integer</td>
+<td>-max-priority-1</td>
+</tr>
+<tr>
+<td>max-priority-2</td>
+<td>Integer</td>
+<td>-max-priority-2</td>
+</tr>
+<tr>
+<td>max-priority-3</td>
+<td>Integer</td>
+<td>-max-priority-3</td>
+</tr>
+<tr>
+<td>enable-global-analysis</td>
+<td>Boolean</td>
+<td>-enable-global-analysis</td>
+</tr>
+<tr>
+<td>enable-clang-static-analyzer</td>
+<td>Boolean</td>
+<td>-enable-clang-static-analyzer</td>
+</tr>
+</tbody></table>
+<p>看到最后两个配置。oclint的分析还支持了clang的静态分析，也就是在这个选项打开的情况下，结果输出还会包含clang的静态分析结果。</p>
+<h3 id="四、OCLint部分规则"><a href="#四、OCLint部分规则" class="headerlink" title="四、OCLint部分规则"></a>四、OCLint部分规则</h3><p>这里简单介绍几个实用的oclint规则，现在xcode自己的编译分析已经覆盖很多方面了，oclint中的一些规则也有些过时，想了解全部规则可以参考<a target="_blank" rel="noopener" href="http://docs.oclint.org/en/stable/rules/index.html">OCLint官网规则目录</a>。如果想自定义规则可以参考<a target="_blank" rel="noopener" href="http://docs.oclint.org/en/stable/devel/rules.html">编写自定义规则</a>。</p>
+<p>1、MissingHashMethod</p>
+<blockquote>
+<p>简单解释：<code>isEqual</code> 方法被重写, <code>hash</code> 方法也应该被重写。</p>
+</blockquote>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">BaseObject</span> </span></span><br><span class="line">- (<span class="type">BOOL</span>)isEqual:(<span class="type">id</span>)obj &#123; </span><br><span class="line"> <span class="keyword">return</span> <span class="literal">YES</span>; </span><br><span class="line">&#125; </span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">- (int)hash is missing; If you override isEqual you must override hash too.</span></span><br><span class="line"><span class="comment">*/</span> </span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<p>2、CallingProtectedMethod</p>
+<blockquote>
+<p>简单解释：在<code>Objective-C</code> 中虽然没有<code>protected</code>这个概念。但是在设计的角度，我们有时希望一个方法只希望被它自己或者它的子类调用。这个方法可以模仿<code>protected</code>在有人调用的时候给一个警告。</p>
+</blockquote>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">A</span> : <span class="title">NSObject</span></span></span><br><span class="line">- (<span class="type">void</span>)foo __attribute__((annotate(<span class="string">&quot;oclint:enforce[protected method]&quot;</span>)));</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">B</span> : <span class="title">NSObject</span></span></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">strong</span>, <span class="keyword">nonatomic</span>) A* a;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">B</span></span></span><br><span class="line">- (<span class="type">void</span>)bar &#123;</span><br><span class="line">    [<span class="keyword">self</span>.a foo]; <span class="comment">// calling protected method foo from outside A and its subclasses</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<p>3、MissingAbstractMethodImplementation</p>
+<blockquote>
+<p>简单解释：由于<code>Objective</code>的<code>runtime</code>特性，抽象方法可以被声明，可以不实现，该规则验证子类是否正确实现抽象方法。</p>
+</blockquote>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">Parent</span></span></span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>)anAbstractMethod __attribute__((annotate(<span class="string">&quot;oclint:enforce[abstract method]&quot;</span>)));</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">Child</span> : <span class="title">Parent</span></span></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">Child</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">// Child, as a subclass of Parent, must implement anAbstractMethod</span></span><br><span class="line"><span class="comment">- (void)anAbstractMethod &#123;&#125;</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<p>4、UnnecessaryDefaultStatement</p>
+<blockquote>
+<p>简单解释：如果<code>switch</code>覆盖了所有的条件，<code>default</code>是不需要的应该被移除。如果不是<code>default</code>还是需要的。</p>
+</blockquote>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">enum</span> &#123;</span><br><span class="line">    value1 = <span class="number">0</span>,</span><br><span class="line">    value2 = <span class="number">1</span></span><br><span class="line">&#125; eValues;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> aMethod(eValues a)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">switch</span>(a)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">case</span> value1:</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> value2:</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:          <span class="comment">// this break is obsolete because all</span></span><br><span class="line">            <span class="keyword">break</span>;        <span class="comment">// values of variable a are already covered.</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>5、MisplacedDefaultLabel</p>
+<blockquote>
+<p>简单解释：<code>default</code>应该在<code>switch</code>的最后。</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">void example(int a)</span><br><span class="line">&#123;</span><br><span class="line">    switch (a) &#123;</span><br><span class="line">        case 1:</span><br><span class="line">            break;</span><br><span class="line">        default:  // the default case should be last</span><br><span class="line">            break;</span><br><span class="line">        case 2:</span><br><span class="line">            break;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>6、InvertedLogic</p>
+<blockquote>
+<p>简单解释：倒置逻辑不易理解。</p>
+</blockquote>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> example(<span class="type">int</span> a)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> i;</span><br><span class="line">    <span class="keyword">if</span> (a != <span class="number">0</span>)             <span class="comment">// if (a == 0)</span></span><br><span class="line">    &#123;                       <span class="comment">// &#123;</span></span><br><span class="line">        i = <span class="number">1</span>;              <span class="comment">//      i = 0;</span></span><br><span class="line">    &#125;                       <span class="comment">// &#125;</span></span><br><span class="line">    <span class="keyword">else</span>                    <span class="comment">// else</span></span><br><span class="line">    &#123;                       <span class="comment">// &#123;</span></span><br><span class="line">        i = <span class="number">0</span>;              <span class="comment">//      i = 1;</span></span><br><span class="line">    &#125;                       <span class="comment">// &#125;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> !i ? <span class="number">-1</span> : <span class="number">1</span>;     <span class="comment">// return i ? 1 : -1;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>7、MissingBreakInSwitchStatement</p>
+<blockquote>
+<p>简单解释：在<code>switch</code>语句中缺失了<code>break</code>，很有可能引发<code>bug</code>。</p>
+</blockquote>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> example(<span class="type">int</span> a)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">switch</span> (a) &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">            <span class="comment">// do something</span></span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="五、消除OCLint警告"><a href="#五、消除OCLint警告" class="headerlink" title="五、消除OCLint警告"></a>五、消除OCLint警告</h3><p>OCLint提供了多种消除警告的方法，首先对于规则本身存在问题的情况下可以自主修改规则代码，详情可见官方文档。对于不需要这个规则的情况，可以在.oclint文件中禁用这个规则，或者可以将规则从目录下移除。如果一些特殊情况，可以用标注去声明消除某个规则，遇到这类声明OCLint不会分析声明消除的规则。</p>
+<p><b>标注语法</b></p>
+<blockquote>
+<p>Unused method parameter是这个规则的名称。表示在区域内忽略这个规则。</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__attribute__((annotate(&quot;oclint:suppress[unused method parameter]&quot;)))</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>有多个规则需要忽略时使用</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__attribute__((annotate(&quot;oclint:suppress[high cyclomatic complexity]&quot;), annotate(&quot;oclint:suppress[high npath complexity]&quot;), annotate(&quot;oclint:suppress[high ncss method]&quot;)))</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>忽略所有规则</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__attribute__((annotate(&quot;oclint:suppress&quot;)))</span><br></pre></td></tr></table></figure>
+
+<p><b>作用域</b>	</p>
+<p>在作用域内，标注都是有效的。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">bool</span> __attribute__((annotate(<span class="string">&quot;oclint:suppress&quot;</span>))) aMethod(<span class="type">int</span> aParameter)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// warnings within this method are suppressed at all</span></span><br><span class="line">    <span class="comment">// like unused aParameter variable and empty if statement</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="number">1</span>) &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">IBAction</span>)turnoverValueChanged:</span><br><span class="line">    (<span class="type">id</span>) __attribute__((annotate(<span class="string">&quot;oclint:suppress[unused method parameter]&quot;</span>))) sender</span><br><span class="line">    <span class="comment">// suppress sender variable</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> i; <span class="comment">// won&#x27;t suppress this one</span></span><br><span class="line">    [<span class="keyword">self</span> calculateTurnover];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>)dismissAllViews:(<span class="type">id</span>)currentView parentView:(<span class="type">id</span>)parentView</span><br><span class="line">   __attribute__((annotate(<span class="string">&quot;oclint:suppress&quot;</span>)))</span><br><span class="line">   <span class="comment">// again, suppress the warnings for entire method</span></span><br><span class="line">&#123;</span><br><span class="line">    [<span class="keyword">self</span> dismissTurnoverView];</span><br><span class="line">    <span class="comment">// plus 30+ lines of code of dismissing other views</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><b>!OCLint注释</b></p>
+<p>另外也可以用注释去消除某个规则。通过添加<font color='red'><code>//!OCLint</code></font>注释。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> a() &#123;</span><br><span class="line">    <span class="type">int</span> unusedLocalVariable; <span class="comment">//!OCLINT</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当然便于更好的理解，应该添加一些注释去修饰一下原因，以便后续维护。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> Results::numberOfWarnings()</span><br><span class="line">&#123;</span><br><span class="line">    std::lock_guard&lt;std::mutex&gt; lock(_mutex); <span class="comment">//!OCLint(FP - meant to be unused)</span></span><br><span class="line">    <span class="comment">//Everything after the letter &#x27;t&#x27; is ignored, but just for better readability</span></span><br><span class="line">    <span class="keyword">return</span> _compilerWarningSet-&gt;numberOfViolations();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2019/03/31/%E7%BA%A6%E6%9D%9F%E4%BC%98%E5%85%88%E7%BA%A7%E7%9A%84%E4%BD%BF%E7%94%A8/" rel="prev" title="约束优先级的使用">
+                  <i class="fa fa-chevron-left"></i> 约束优先级的使用
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2019/06/15/%E4%B8%BA%E4%BB%80%E4%B9%88OC%E4%B8%AD%E6%B2%A1%E6%9C%89%E6%96%B9%E6%B3%95%E9%87%8D%E8%BD%BD/" rel="next" title="为什么OC中没有方法重载">
+                  为什么OC中没有方法重载 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jin.</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.12.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="需求场景H5页面使用客户端的相册图片。H5调用客户端的相册功能选取图片，图片资源在客户端本地，因此需要客户端将选取后的图片数据返回给H5。 方案设计一、直接通过桥将数据传给H5应用将获取的UIImage对象转化为NSData对象，通过桥，直接将NSData对象传给H5应用。 二、拦截H5的网络请求，将图片数据通过网络请求的方式返回给H5应用客户端图片选取之后，生成一个图片地址，地址中包含特定的图片">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS和H5图片数据交互方案">
+<meta property="og:url" content="http://example.com/2019/06/15/iOS%E5%92%8CH5%E5%9B%BE%E7%89%87%E6%95%B0%E6%8D%AE%E4%BA%A4%E4%BA%92%E6%96%B9%E6%A1%88/index.html">
+<meta property="og:site_name" content="一只代码狗的随笔">
+<meta property="og:description" content="需求场景H5页面使用客户端的相册图片。H5调用客户端的相册功能选取图片，图片资源在客户端本地，因此需要客户端将选取后的图片数据返回给H5。 方案设计一、直接通过桥将数据传给H5应用将获取的UIImage对象转化为NSData对象，通过桥，直接将NSData对象传给H5应用。 二、拦截H5的网络请求，将图片数据通过网络请求的方式返回给H5应用客户端图片选取之后，生成一个图片地址，地址中包含特定的图片">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/shiroJin/image-storage/master/iOS%E5%92%8CH5%E5%9B%BE%E7%89%87%E4%BA%A4%E4%BA%92%E6%96%B9%E6%A1%88_1.png">
+<meta property="article:published_time" content="2019-06-15T04:00:00.000Z">
+<meta property="article:modified_time" content="2019-06-15T04:00:00.000Z">
+<meta property="article:author" content="Jin.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/shiroJin/image-storage/master/iOS%E5%92%8CH5%E5%9B%BE%E7%89%87%E4%BA%A4%E4%BA%92%E6%96%B9%E6%A1%88_1.png">
+
+
+<link rel="canonical" href="http://example.com/2019/06/15/iOS%E5%92%8CH5%E5%9B%BE%E7%89%87%E6%95%B0%E6%8D%AE%E4%BA%A4%E4%BA%92%E6%96%B9%E6%A1%88/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://example.com/2019/06/15/iOS%E5%92%8CH5%E5%9B%BE%E7%89%87%E6%95%B0%E6%8D%AE%E4%BA%A4%E4%BA%92%E6%96%B9%E6%A1%88/","path":"2019/06/15/iOS和H5图片数据交互方案/","title":"iOS和H5图片数据交互方案"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>iOS和H5图片数据交互方案 | 一只代码狗的随笔</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">一只代码狗的随笔</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">知其然知其所以然！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E5%9C%BA%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">需求场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%A1%88%E8%AE%BE%E8%AE%A1"><span class="nav-number">2.</span> <span class="nav-text">方案设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E7%9B%B4%E6%8E%A5%E9%80%9A%E8%BF%87%E6%A1%A5%E5%B0%86%E6%95%B0%E6%8D%AE%E4%BC%A0%E7%BB%99H5%E5%BA%94%E7%94%A8"><span class="nav-number">2.0.1.</span> <span class="nav-text">一、直接通过桥将数据传给H5应用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%8B%A6%E6%88%AAH5%E7%9A%84%E7%BD%91%E7%BB%9C%E8%AF%B7%E6%B1%82%EF%BC%8C%E5%B0%86%E5%9B%BE%E7%89%87%E6%95%B0%E6%8D%AE%E9%80%9A%E8%BF%87%E7%BD%91%E7%BB%9C%E8%AF%B7%E6%B1%82%E7%9A%84%E6%96%B9%E5%BC%8F%E8%BF%94%E5%9B%9E%E7%BB%99H5%E5%BA%94%E7%94%A8"><span class="nav-number">2.0.2.</span> <span class="nav-text">二、拦截H5的网络请求，将图片数据通过网络请求的方式返回给H5应用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%93%E5%AD%98%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.</span> <span class="nav-text">缓存设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8B%A6%E6%88%AA%E5%99%A8%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.1.</span> <span class="nav-text">拦截器实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%99%8D%E7%BA%A7%E6%96%B9%E6%A1%88"><span class="nav-number">3.2.</span> <span class="nav-text">降级方案</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jin.</p>
+  <div class="site-description" itemprop="description">知其然知其所以然！</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2019/06/15/iOS%E5%92%8CH5%E5%9B%BE%E7%89%87%E6%95%B0%E6%8D%AE%E4%BA%A4%E4%BA%92%E6%96%B9%E6%A1%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jin.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一只代码狗的随笔">
+      <meta itemprop="description" content="知其然知其所以然！">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="iOS和H5图片数据交互方案 | 一只代码狗的随笔">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          iOS和H5图片数据交互方案
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2019-06-15 12:00:00" itemprop="dateCreated datePublished" datetime="2019-06-15T12:00:00+08:00">2019-06-15</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="需求场景"><a href="#需求场景" class="headerlink" title="需求场景"></a>需求场景</h2><p>H5页面使用客户端的相册图片。H5调用客户端的相册功能选取图片，图片资源在客户端本地，因此需要客户端将选取后的图片数据返回给H5。</p>
+<h2 id="方案设计"><a href="#方案设计" class="headerlink" title="方案设计"></a>方案设计</h2><h4 id="一、直接通过桥将数据传给H5应用"><a href="#一、直接通过桥将数据传给H5应用" class="headerlink" title="一、直接通过桥将数据传给H5应用"></a>一、直接通过桥将数据传给H5应用</h4><p>将获取的UIImage对象转化为NSData对象，通过桥，直接将NSData对象传给H5应用。</p>
+<h4 id="二、拦截H5的网络请求，将图片数据通过网络请求的方式返回给H5应用"><a href="#二、拦截H5的网络请求，将图片数据通过网络请求的方式返回给H5应用" class="headerlink" title="二、拦截H5的网络请求，将图片数据通过网络请求的方式返回给H5应用"></a>二、拦截H5的网络请求，将图片数据通过网络请求的方式返回给H5应用</h4><p>客户端图片选取之后，生成一个图片地址，地址中包含特定的图片协议和这个图片的唯一标识符。图片地址返回给H5应用，H5应用取得图片地址后，将图片地址视为一个网络图片地址，通过request请求图片数据。客户端通过NSURLProtocol拦截WebView发起的包含特定图片协议的网络请求，并根据请求的地址匹配本地的图片资源，生成response返回给H5应用。客户端在请求过程中扮演一个本地服务器的角色。<br><img src="https://raw.githubusercontent.com/shiroJin/image-storage/master/iOS%E5%92%8CH5%E5%9B%BE%E7%89%87%E4%BA%A4%E4%BA%92%E6%96%B9%E6%A1%88_1.png"></p>
+<h2 id="缓存设计"><a href="#缓存设计" class="headerlink" title="缓存设计"></a>缓存设计</h2><p>相册选择完图片后，已经获取到了图片数据，对应的图片数据进行缓存，提高读取效率。获取到的UIImage对象转化为NSData数据存储在缓存池中，缓存池的结构为简单的hash表。</p>
+<h3 id="拦截器实现"><a href="#拦截器实现" class="headerlink" title="拦截器实现"></a>拦截器实现</h3><p>iOS中系统提供了请求的拦截器——NSURLProtocol。子类化NSURLProtocol类，并注册这个urlProtocol即可拦截到当前进程的网络请求。但在 WKWebView 中的请求却完全不遵从这一规则，WKWebView有自己独立的进程，通过IPC进行进程间通信。想要拦截WKWebView的请求则需要通过c类的registerSchemeForCustomProtocol:方法进行注册urlProtocol(WKBrowsingContextController是私有类，只能通过runtime的方式生成获取这个类，且iOS 8.4 以后才被引入，调用私有类和私有方法存在被拒的隐患)。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 注册protocol scheme为自定义的protocol。</span></span><br><span class="line">Class cls = [[[<span class="built_in">WKWebView</span> new] valueForKey:<span class="string">@&quot;browsingContextController&quot;</span>] <span class="keyword">class</span>];</span><br><span class="line">SEL sel = <span class="built_in">NSSelectorFromString</span>(<span class="string">@&quot;registerSchemeForCustomProtocol:&quot;</span>);</span><br><span class="line"><span class="keyword">if</span> ([(<span class="type">id</span>)cls respondsToSelector:sel]) &#123;</span><br><span class="line">	[(<span class="type">id</span>)cls performSelector:sel withObject:scheme];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="降级方案"><a href="#降级方案" class="headerlink" title="降级方案"></a>降级方案</h3><p>对于iOS 8.4 以下的版本，无法获取到WKBrowsingContextController类，也就导致无法进行网络拦截。在整个图片选择逻辑中，APP通过桥传输的都是图片的地址。H5应用都是直接加载图片地址的数据。因此，对于iOS 8.4以下的版本，APP端不作本地服务器，选择完图片后自行传到远程服务器，将正常的网络图片地址传给H5应用。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2019/06/15/%E4%B8%BA%E4%BB%80%E4%B9%88OC%E4%B8%AD%E6%B2%A1%E6%9C%89%E6%96%B9%E6%B3%95%E9%87%8D%E8%BD%BD/" rel="prev" title="为什么OC中没有方法重载">
+                  <i class="fa fa-chevron-left"></i> 为什么OC中没有方法重载
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2019/06/22/PNG%E5%9B%BE%E7%89%87%E7%BC%96%E8%A7%A3%E7%A0%81%E6%8E%A2%E7%B4%A2/" rel="next" title="PNG图片编解码探索">
+                  PNG图片编解码探索 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jin.</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

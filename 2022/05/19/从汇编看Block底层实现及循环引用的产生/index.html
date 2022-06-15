@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.12.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="block是什么源码： 12345- (void)foo2 &amp;#123;    self.myBlock &#x3D; ^&amp;#123;        [self foo];    &amp;#125;;&amp;#125;  Assemble后： 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从汇编看Block底层">
+<meta property="og:url" content="http://example.com/2022/05/19/%E4%BB%8E%E6%B1%87%E7%BC%96%E7%9C%8BBlock%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0%E5%8F%8A%E5%BE%AA%E7%8E%AF%E5%BC%95%E7%94%A8%E7%9A%84%E4%BA%A7%E7%94%9F/index.html">
+<meta property="og:site_name" content="一只代码狗的随笔">
+<meta property="og:description" content="block是什么源码： 12345- (void)foo2 &amp;#123;    self.myBlock &#x3D; ^&amp;#123;        [self foo];    &amp;#125;;&amp;#125;  Assemble后： 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-05-19T08:41:46.111Z">
+<meta property="article:modified_time" content="2022-05-23T05:58:56.958Z">
+<meta property="article:author" content="Jin.">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2022/05/19/%E4%BB%8E%E6%B1%87%E7%BC%96%E7%9C%8BBlock%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0%E5%8F%8A%E5%BE%AA%E7%8E%AF%E5%BC%95%E7%94%A8%E7%9A%84%E4%BA%A7%E7%94%9F/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://example.com/2022/05/19/%E4%BB%8E%E6%B1%87%E7%BC%96%E7%9C%8BBlock%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0%E5%8F%8A%E5%BE%AA%E7%8E%AF%E5%BC%95%E7%94%A8%E7%9A%84%E4%BA%A7%E7%94%9F/","path":"2022/05/19/从汇编看Block底层实现及循环引用的产生/","title":"从汇编看Block底层"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>从汇编看Block底层 | 一只代码狗的随笔</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">一只代码狗的随笔</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">知其然知其所以然！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#block%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">1.</span> <span class="nav-text">block是什么</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BC%9A%E4%BA%A7%E7%94%9F%E5%BE%AA%E7%8E%AF%E5%BC%95%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">为什么会产生循环引用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#weak%E6%98%AF%E5%A6%82%E4%BD%95%E8%A7%A3%E9%99%A4%E5%BE%AA%E7%8E%AF%E5%BC%95%E7%94%A8%E7%9A%84%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">__weak是如何解除循环引用的？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#block%E5%86%85%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-strong%E5%91%A2%EF%BC%9F"><span class="nav-number">4.</span> <span class="nav-text">block内为什么需要__strong呢？</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jin.</p>
+  <div class="site-description" itemprop="description">知其然知其所以然！</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/05/19/%E4%BB%8E%E6%B1%87%E7%BC%96%E7%9C%8BBlock%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0%E5%8F%8A%E5%BE%AA%E7%8E%AF%E5%BC%95%E7%94%A8%E7%9A%84%E4%BA%A7%E7%94%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jin.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一只代码狗的随笔">
+      <meta itemprop="description" content="知其然知其所以然！">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="从汇编看Block底层 | 一只代码狗的随笔">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          从汇编看Block底层
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2022-05-19 16:41:46" itemprop="dateCreated datePublished" datetime="2022-05-19T16:41:46+08:00">2022-05-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2022-05-23 13:58:56" itemprop="dateModified" datetime="2022-05-23T13:58:56+08:00">2022-05-23</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="block是什么"><a href="#block是什么" class="headerlink" title="block是什么"></a>block是什么</h1><p>源码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">- (void)foo2 &#123;</span><br><span class="line">    self.myBlock = ^&#123;</span><br><span class="line">        [self foo];</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Assemble后：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">&quot;-[Foo foo2]&quot;:                          ; @&quot;\01-[Foo foo2]&quot;</span><br><span class="line">Lfunc_begin4:</span><br><span class="line">; %bb.0:</span><br><span class="line">	sub	sp, sp, #96                     ; =96</span><br><span class="line">	stp	x29, x30, [sp, #80]             ; 16-byte Folded Spill</span><br><span class="line">	add	x29, sp, #80                    ; =80</span><br><span class="line">	stur	x0, [x29, #-8]</span><br><span class="line">	stur	x1, [x29, #-16]</span><br><span class="line">	add	x8, sp, #24                     ; =24</span><br><span class="line">	str	x8, [sp, #8]                    ; 8-byte Folded Spill</span><br><span class="line">Ltmp12:</span><br><span class="line">	adrp	x9, __NSConcreteStackBlock@GOTPAGE</span><br><span class="line">	ldr	x9, [x9, __NSConcreteStackBlock@GOTPAGEOFF]</span><br><span class="line">	str	x9, [sp, #24]</span><br><span class="line">	mov	w9, #-1040187392</span><br><span class="line">	str	w9, [sp, #32]</span><br><span class="line">	str	wzr, [sp, #36]</span><br><span class="line">	adrp	x9, &quot;___11-[Foo foo2]_block_invoke&quot;@PAGE</span><br><span class="line">	add	x9, x9, &quot;___11-[Foo foo2]_block_invoke&quot;@PAGEOFF</span><br><span class="line">	str	x9, [sp, #40]</span><br><span class="line">	adrp	x9, &quot;___block_descriptor_40_e8_32s_e5_v8?0l&quot;@PAGE</span><br><span class="line">	add	x9, x9, &quot;___block_descriptor_40_e8_32s_e5_v8?0l&quot;@PAGEOFF</span><br><span class="line">	str	x9, [sp, #48]</span><br><span class="line">	add	x8, x8, #32                     ; =32</span><br><span class="line">	str	x8, [sp, #16]                   ; 8-byte Folded Spill</span><br><span class="line">	ldur	x0, [x29, #-8]</span><br><span class="line">	bl	_objc_retain</span><br><span class="line">	ldr	x2, [sp, #8]                    ; 8-byte Folded Reload</span><br><span class="line">	str	x0, [sp, #56]</span><br><span class="line">	ldur	x0, [x29, #-8]</span><br><span class="line">	adrp	x8, _OBJC_SELECTOR_REFERENCES_.2@PAGE</span><br><span class="line">	ldr	x1, [x8, _OBJC_SELECTOR_REFERENCES_.2@PAGEOFF]</span><br><span class="line">	bl	_objc_msgSend</span><br><span class="line">	ldr	x0, [sp, #16]                   ; 8-byte Folded Reload</span><br><span class="line">	mov	x1, #0</span><br><span class="line">	bl	_objc_storeStrong</span><br><span class="line">	ldp	x29, x30, [sp, #80]             ; 16-byte Folded Reload</span><br><span class="line">	add	sp, sp, #96                     ; =96</span><br><span class="line">	ret</span><br><span class="line">Ltmp13:</span><br><span class="line">Lfunc_end4:</span><br><span class="line">                                        ; -- End function</span><br><span class="line">	.p2align	2                               ; -- Begin function __11-[Foo foo2]_block_invoke</span><br><span class="line">&quot;___11-[Foo foo2]_block_invoke&quot;:        ; @&quot;__11-[Foo foo2]_block_invoke&quot;</span><br><span class="line">Lfunc_begin5:</span><br><span class="line">; %bb.0:</span><br><span class="line">	sub	sp, sp, #32                     ; =32</span><br><span class="line">	stp	x29, x30, [sp, #16]             ; 16-byte Folded Spill</span><br><span class="line">	add	x29, sp, #16                    ; =16</span><br><span class="line">	str	x0, [sp, #8]</span><br><span class="line">	str	x0, [sp]</span><br><span class="line">Ltmp14:</span><br><span class="line">	ldr	x0, [x0, #32]</span><br><span class="line">	adrp	x8, _OBJC_SELECTOR_REFERENCES_@PAGE</span><br><span class="line">	ldr	x1, [x8, _OBJC_SELECTOR_REFERENCES_@PAGEOFF]</span><br><span class="line">	bl	_objc_msgSend</span><br><span class="line">Ltmp15:</span><br><span class="line">	ldp	x29, x30, [sp, #16]             ; 16-byte Folded Reload</span><br><span class="line">	add	sp, sp, #32                     ; =32</span><br><span class="line">	ret</span><br><span class="line">Ltmp16:</span><br><span class="line">Lfunc_end5:</span><br><span class="line">                                        ; -- End function</span><br></pre></td></tr></table></figure>
+
+<p>这里假设起始sp&#x3D;0x60，方便后续计算。依次解释指令的执行过程和寄存器，栈的值。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sub	sp, sp, #96                     ; =96</span><br><span class="line">stp	x29, x30, [sp, #80]             ; 16-byte Folded Spill</span><br><span class="line">add	x29, sp, #80                    ; =80</span><br><span class="line">stur	x0, [x29, #-8]</span><br><span class="line">stur	x1, [x29, #-16]</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>sub指令；sp &#x3D; sp - 0x60 &#x3D;&gt; sp &#x3D; 0x00</li>
+<li>store pair指令； x29, x30寄存器的值存到sp+0x50&#x3D;0x50的地址，x29，x30表示fp，lr寄存器。</li>
+<li>add指令；fp &#x3D; sp + 0x50 &#x3D; 0x50</li>
+<li>store指令；x0寄存器的值存到[x29, #-8]&#x3D;0x50-0x8&#x3D;0x48的地址。x0&#x3D;self</li>
+<li>同上，x1存到0x40的地址。x1&#x3D;@selector(foo2)</li>
+</ol>
+<p>此时寄存器和栈的状态如下</p>
+<table>
+<thead>
+<tr>
+<th>寄存器</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>x0</td>
+<td>self</td>
+</tr>
+<tr>
+<td>x1</td>
+<td>@selector(foo2)</td>
+</tr>
+<tr>
+<td>fp</td>
+<td>0x50</td>
+</tr>
+<tr>
+<td>sp</td>
+<td>0x00</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>栈地址</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0x60</td>
+<td>上个函数的lr</td>
+</tr>
+<tr>
+<td>0x58</td>
+<td>上个函数的fp</td>
+</tr>
+<tr>
+<td>0x50</td>
+<td>self</td>
+</tr>
+<tr>
+<td>0x48</td>
+<td>@selector(foo2)</td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">	add	x8, sp, #24                     ; =24</span><br><span class="line">	str	x8, [sp, #8]                    ; 8-byte Folded Spill</span><br><span class="line">Ltmp12:</span><br><span class="line">	adrp	x9, __NSConcreteStackBlock@GOTPAGE</span><br><span class="line">	ldr	x9, [x9, __NSConcreteStackBlock@GOTPAGEOFF]</span><br><span class="line">	str	x9, [sp, #24]</span><br><span class="line">	mov	w9, #-1040187392</span><br><span class="line">	str	w9, [sp, #32]</span><br><span class="line">	str	wzr, [sp, #36]</span><br><span class="line">	adrp	x9, &quot;___11-[Foo foo2]_block_invoke&quot;@PAGE</span><br><span class="line">	add	x9, x9, &quot;___11-[Foo foo2]_block_invoke&quot;@PAGEOFF</span><br><span class="line">	str	x9, [sp, #40]</span><br><span class="line">	adrp	x9, &quot;___block_descriptor_40_e8_32s_e5_v8?0l&quot;@PAGE</span><br><span class="line">	add	x9, x9, &quot;___block_descriptor_40_e8_32s_e5_v8?0l&quot;@PAGEOFF</span><br><span class="line">	str	x9, [sp, #48]</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>x8 &#x3D; sp + 24 &#x3D; 0x18</li>
+<li>x8寄存器的值存到0x08的地址（[sp, #8] &#x3D; 0x00 + 0x8）</li>
+<li>adrp是针对aslr技术，获取偏移后的地址；将__NSConcreteStackBlock的isa读取到x9寄存器</li>
+<li>将x9寄存器的值保存到地址0x18</li>
+<li>w9（4字节）赋值#-1040187392</li>
+<li>w9寄存器的值存到地址0x20</li>
+<li>wzr（word zero register），地址0x24写入4字节的0。</li>
+<li>同上，x9寄存器赋值”___11-[Foo foo2]_block_invoke”的地址</li>
+<li>x9寄存器的值存到地址0x28</li>
+<li>同上将”___block_descriptor_40_e8_32s_e5_v8?0l”的地址存到地址0x30</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>寄存器</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>x0</td>
+<td>self</td>
+</tr>
+<tr>
+<td>x1</td>
+<td>@selector(foo2)</td>
+</tr>
+<tr>
+<td>fp</td>
+<td>0x50</td>
+</tr>
+<tr>
+<td>sp</td>
+<td>0x00</td>
+</tr>
+<tr>
+<td>x8</td>
+<td>0x18</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>栈地址</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0x60</td>
+<td>上个函数的lr</td>
+</tr>
+<tr>
+<td>0x58</td>
+<td>上个函数的fp</td>
+</tr>
+<tr>
+<td>0x50</td>
+<td>self</td>
+</tr>
+<tr>
+<td>0x48</td>
+<td>@selector(foo2)</td>
+</tr>
+<tr>
+<td>…</td>
+<td></td>
+</tr>
+<tr>
+<td>0x30</td>
+<td>“___block_descriptor_40_e8_32s_e5_v8?0l”</td>
+</tr>
+<tr>
+<td>0x28</td>
+<td>“___11-[Foo foo2]_block_invoke”</td>
+</tr>
+<tr>
+<td>0x20</td>
+<td>-1040187392; 0</td>
+</tr>
+<tr>
+<td>0x18</td>
+<td>__NSConcreteStackBlock</td>
+</tr>
+<tr>
+<td>0x10</td>
+<td></td>
+</tr>
+<tr>
+<td>0x08</td>
+<td>0x18</td>
+</tr>
+<tr>
+<td>0x00</td>
+<td></td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">add	x8, x8, #32                     ; =32</span><br><span class="line">str	x8, [sp, #16]                   ; 8-byte Folded Spill</span><br><span class="line">ldur	x0, [x29, #-8]</span><br><span class="line">bl	_objc_retain</span><br><span class="line">ldr	x2, [sp, #8]                    ; 8-byte Folded Reload</span><br><span class="line">str	x0, [sp, #56]</span><br><span class="line">ldur	x0, [x29, #-8]</span><br><span class="line">adrp	x8, _OBJC_SELECTOR_REFERENCES_.2@PAGE</span><br><span class="line">ldr	x1, [x8, _OBJC_SELECTOR_REFERENCES_.2@PAGEOFF]</span><br><span class="line">bl	_objc_msgSend</span><br><span class="line">ldr	x0, [sp, #16]                   ; 8-byte Folded Reload</span><br><span class="line">mov	x1, #0</span><br><span class="line">bl	_objc_storeStrong</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>x8 &#x3D; x8 + 0x20 &#x3D; 0x38</li>
+<li>x8寄存器值存到地址0x10</li>
+<li>x0 &#x3D; self</li>
+<li>调用_objc_retain函数</li>
+<li>x2 &#x3D; 0x18</li>
+<li>x0寄存器值存到地址0x38</li>
+<li><em>OBJC_SELECTOR_REFERENCES</em>.2指的是@selector(setMyBlock:)。x1 &#x3D; @selector(setMyBlock:)</li>
+<li>调用_objc_msgSend函数</li>
+<li>地址0x10的值读取到x0寄存器</li>
+<li>x1 &#x3D; 0</li>
+<li>调用_objc_storeStrong</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>寄存器</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>x0</td>
+<td>self</td>
+</tr>
+<tr>
+<td>x1</td>
+<td>@selector(foo2)</td>
+</tr>
+<tr>
+<td>fp</td>
+<td>0x50</td>
+</tr>
+<tr>
+<td>sp</td>
+<td>0x00</td>
+</tr>
+<tr>
+<td>x8</td>
+<td>0x18</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>栈地址</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0x60</td>
+<td>上个函数的lr</td>
+</tr>
+<tr>
+<td>0x58</td>
+<td>上个函数的fp</td>
+</tr>
+<tr>
+<td>0x50</td>
+<td>self</td>
+</tr>
+<tr>
+<td>0x48</td>
+<td>@selector(foo2)</td>
+</tr>
+<tr>
+<td>0x38</td>
+<td>self</td>
+</tr>
+<tr>
+<td>0x30</td>
+<td>“___block_descriptor_40_e8_32s_e5_v8?0l”</td>
+</tr>
+<tr>
+<td>0x28</td>
+<td>“___11-[Foo foo2]_block_invoke”</td>
+</tr>
+<tr>
+<td>0x20</td>
+<td>-1040187392; 0</td>
+</tr>
+<tr>
+<td>0x18</td>
+<td>__NSConcreteStackBlock</td>
+</tr>
+<tr>
+<td>0x10</td>
+<td>0x38</td>
+</tr>
+<tr>
+<td>0x08</td>
+<td>0x18</td>
+</tr>
+<tr>
+<td>0x00</td>
+<td></td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ldp	x29, x30, [sp, #80]             ; 16-byte Folded Reload</span><br><span class="line">add	sp, sp, #96                     ; =96</span><br><span class="line">ret</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>恢复上个函数的fp，lr寄存器值</li>
+<li>sp -&#x3D; 0x60</li>
+<li>return</li>
+</ol>
+<p>上述就是foo2函数的指令执行过程， 可以发现block初始化的时候是分配在栈空间，block也是个对象，有isa指正，这里是__NSConcreteStackBlock类。</p>
+<p>通过<code>clang -rewrite-objc Foo.m</code>可以看到block结构体的声明，如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> BLOCK_IMPL</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BLOCK_IMPL</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">__block_impl</span> &#123;</span><br><span class="line">  <span class="type">void</span> *isa;</span><br><span class="line">  <span class="type">int</span> Flags;</span><br><span class="line">  <span class="type">int</span> Reserved;</span><br><span class="line">  <span class="type">void</span> *FuncPtr;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">__Foo__foo2_block_impl_0</span> &#123;</span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">__block_impl</span> impl;</span><br><span class="line">  <span class="keyword">struct</span> <span class="title class_">__Foo__foo2_block_desc_0</span>* Desc;</span><br><span class="line">  Foo *<span class="type">const</span> __strong self;</span><br><span class="line">  __Foo__foo2_block_impl_0(<span class="type">void</span> *fp, <span class="keyword">struct</span> __Foo__foo2_block_desc_0 *desc, Foo *<span class="type">const</span> __strong _self, <span class="type">int</span> flags=<span class="number">0</span>) : <span class="built_in">self</span>(_self) &#123;</span><br><span class="line">    impl.isa = &amp;_NSConcreteStackBlock;</span><br><span class="line">    impl.Flags = flags;</span><br><span class="line">    impl.FuncPtr = fp;</span><br><span class="line">    Desc = desc;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>栈地址</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0x38</td>
+<td>self</td>
+</tr>
+<tr>
+<td>0x30</td>
+<td>“___block_descriptor_40_e8_32s_e5_v8?0l”</td>
+</tr>
+<tr>
+<td>0x28</td>
+<td>“___11-[Foo foo2]_block_invoke”</td>
+</tr>
+<tr>
+<td>0x20</td>
+<td>-1040187392; 0</td>
+</tr>
+<tr>
+<td>0x18</td>
+<td>__NSConcreteStackBlock</td>
+</tr>
+</tbody></table>
+<p>跟栈去的内存分配完全吻合。从低地址到高地址依次为isa，Flags，Reserved，FuncPtr，Desc，self。其中self就是block捕获的变量。</p>
+<p>接着看下block_descriptor到底是什么。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">	.private_extern	&quot;___block_descriptor_40_e8_32s_e5_v8?0l&quot; ; @&quot;__block_descriptor_40_e8_32s_e5_v8\01?0l&quot;</span><br><span class="line">	.section	__DATA,__const</span><br><span class="line">	.globl	&quot;___block_descriptor_40_e8_32s_e5_v8?0l&quot;</span><br><span class="line">	.weak_def_can_be_hidden	&quot;___block_descriptor_40_e8_32s_e5_v8?0l&quot;</span><br><span class="line">	.p2align	3</span><br><span class="line">&quot;___block_descriptor_40_e8_32s_e5_v8?0l&quot;:</span><br><span class="line">	.quad	0                               ; 0x0</span><br><span class="line">	.quad	40                              ; 0x28</span><br><span class="line">	.quad	___copy_helper_block_e8_32s</span><br><span class="line">	.quad	___destroy_helper_block_e8_32s</span><br><span class="line">	.quad	l_.str</span><br><span class="line">	.quad	256                             ; 0x100</span><br></pre></td></tr></table></figure>
+
+<p>可以看到<code>___block_descriptor_40_e8_32s_e5_v8</code>在data段。</p>
+<p>cpp的结构如下</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="keyword">struct</span> <span class="title class_">__Foo__foo_block_desc_0</span> &#123;</span><br><span class="line">  <span class="type">size_t</span> reserved;</span><br><span class="line">  <span class="type">size_t</span> Block_size;</span><br><span class="line">  <span class="built_in">void</span> (*copy)(<span class="keyword">struct</span> __Foo__foo_block_impl_0*, <span class="keyword">struct</span> __Foo__foo_block_impl_0*);</span><br><span class="line">  <span class="built_in">void</span> (*dispose)(<span class="keyword">struct</span> __Foo__foo_block_impl_0*);</span><br><span class="line">&#125; __Foo__foo_block_desc_0_DATA = &#123; <span class="number">0</span>, <span class="built_in">sizeof</span>(<span class="keyword">struct</span> __Foo__foo_block_impl_0), __Foo__foo_block_copy_0, __Foo__foo_block_dispose_0&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>结合<code>__Foo__foo_block_desc_0</code>的结构，可以得到reserved&#x3D;0，Block_size&#x3D;40。跟上述栈的内存分配吻合。而后则是copy和destory函数。</p>
+<h1 id="为什么会产生循环引用"><a href="#为什么会产生循环引用" class="headerlink" title="为什么会产生循环引用"></a>为什么会产生循环引用</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bl	_objc_retain 			; x0 = self</span><br></pre></td></tr></table></figure>
+
+<p>上述汇编代码中可以看到在构建block时，self被调用retain。从而导致了循环引用的问题出现。</p>
+<h1 id="weak是如何解除循环引用的？"><a href="#weak是如何解除循环引用的？" class="headerlink" title="__weak是如何解除循环引用的？"></a>__weak是如何解除循环引用的？</h1><p>接着上述代码加上weak修饰符，如下👇🏻。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="type">void</span>)foo &#123;</span><br><span class="line">    __<span class="keyword">weak</span> Foo *wself = <span class="keyword">self</span>;</span><br><span class="line">    <span class="keyword">self</span>.myBlock = ^&#123;</span><br><span class="line">        [wself foo];</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>assemble：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">&quot;-[Foo foo]&quot;:                           ; @&quot;\01-[Foo foo]&quot;</span><br><span class="line">Lfunc_begin0:</span><br><span class="line">; %bb.0:</span><br><span class="line">	sub	sp, sp, #128                    ; =128</span><br><span class="line">	stp	x29, x30, [sp, #112]            ; 16-byte Folded Spill</span><br><span class="line">	add	x29, sp, #112                   ; =112</span><br><span class="line">	stur	x0, [x29, #-8]</span><br><span class="line">	stur	x1, [x29, #-16]</span><br><span class="line">Ltmp3:</span><br><span class="line">	ldur	x1, [x29, #-8]</span><br><span class="line">	sub	x0, x29, #24                    ; =24</span><br><span class="line">	str	x0, [sp, #8]                    ; 8-byte Folded Spill</span><br><span class="line">	bl	_objc_initWeak</span><br><span class="line">	ldr	x1, [sp, #8]                    ; 8-byte Folded Reload</span><br><span class="line">	add	x8, sp, #48                     ; =48</span><br><span class="line">	str	x8, [sp, #24]                   ; 8-byte Folded Spill</span><br><span class="line">	adrp	x9, __NSConcreteStackBlock@GOTPAGE</span><br><span class="line">	ldr	x9, [x9, __NSConcreteStackBlock@GOTPAGEOFF]</span><br><span class="line">	str	x9, [sp, #48]</span><br><span class="line">	mov	w9, #-1040187392</span><br><span class="line">	str	w9, [sp, #56]</span><br><span class="line">	str	wzr, [sp, #60]</span><br><span class="line">	adrp	x9, &quot;___10-[Foo foo]_block_invoke&quot;@PAGE</span><br><span class="line">	add	x9, x9, &quot;___10-[Foo foo]_block_invoke&quot;@PAGEOFF</span><br><span class="line">	str	x9, [sp, #64]</span><br><span class="line">	adrp	x9, &quot;___block_descriptor_40_e8_32w_e5_v8?0l&quot;@PAGE</span><br><span class="line">	add	x9, x9, &quot;___block_descriptor_40_e8_32w_e5_v8?0l&quot;@PAGEOFF</span><br><span class="line">	str	x9, [sp, #72]</span><br><span class="line">	add	x0, x8, #32                     ; =32</span><br><span class="line">	str	x0, [sp, #16]                   ; 8-byte Folded Spill</span><br><span class="line">	bl	_objc_copyWeak</span><br><span class="line">	ldr	x2, [sp, #24]                   ; 8-byte Folded Reload</span><br><span class="line">	ldur	x0, [x29, #-8]</span><br><span class="line">	adrp	x8, _OBJC_SELECTOR_REFERENCES_.2@PAGE</span><br><span class="line">	ldr	x1, [x8, _OBJC_SELECTOR_REFERENCES_.2@PAGEOFF]</span><br><span class="line">Ltmp0:</span><br><span class="line">	bl	_objc_msgSend</span><br><span class="line">Ltmp1:</span><br><span class="line">; %bb.1:</span><br><span class="line">	ldr	x0, [sp, #16]                   ; 8-byte Folded Reload</span><br><span class="line">	bl	_objc_destroyWeak</span><br><span class="line">	sub	x0, x29, #24                    ; =24</span><br><span class="line">	bl	_objc_destroyWeak</span><br><span class="line">	ldp	x29, x30, [sp, #112]            ; 16-byte Folded Reload</span><br><span class="line">	add	sp, sp, #128                    ; =128</span><br><span class="line">	ret</span><br></pre></td></tr></table></figure>
+
+<p>从汇编中可以看到，在初始化wself的时候调用了objc_initWeak函数，在构建block结构的时候使用了objc_copyWeak。没有使用objc_retain，因此self的引用计数没有加1。从而没有循环引用的出现。</p>
+<h1 id="block内为什么需要-strong呢？"><a href="#block内为什么需要-strong呢？" class="headerlink" title="block内为什么需要__strong呢？"></a>block内为什么需要__strong呢？</h1><p>看👇🏻代码，block中两次引用了wself。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="type">void</span>)foo &#123;</span><br><span class="line">    __<span class="keyword">weak</span> Foo *wself = <span class="keyword">self</span>;</span><br><span class="line">    <span class="keyword">self</span>.myBlock = ^&#123;</span><br><span class="line">        [wself foo1];</span><br><span class="line">        [wself foo1];</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>assemble:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">&quot;___10-[Foo foo]_block_invoke&quot;:         ; @&quot;__10-[Foo foo]_block_invoke&quot;</span><br><span class="line">Lfunc_begin1:</span><br><span class="line">; %bb.0:</span><br><span class="line">	sub	sp, sp, #64                     ; =64</span><br><span class="line">	stp	x29, x30, [sp, #48]             ; 16-byte Folded Spill</span><br><span class="line">	add	x29, sp, #48                    ; =48</span><br><span class="line">	str	x0, [sp, #8]                    ; 8-byte Folded Spill</span><br><span class="line">	stur	x0, [x29, #-8]</span><br><span class="line">	stur	x0, [x29, #-16]</span><br><span class="line">Ltmp8:</span><br><span class="line">	add	x0, x0, #32                     ; =32</span><br><span class="line">	bl	_objc_loadWeakRetained</span><br><span class="line">	str	x0, [sp]                        ; 8-byte Folded Spill</span><br><span class="line">	adrp	x8, _OBJC_SELECTOR_REFERENCES_.2@PAGE</span><br><span class="line">	str	x8, [sp, #16]                   ; 8-byte Folded Spill</span><br><span class="line">	ldr	x1, [x8, _OBJC_SELECTOR_REFERENCES_.2@PAGEOFF]</span><br><span class="line">	bl	_objc_msgSend</span><br><span class="line">	ldr	x0, [sp]                        ; 8-byte Folded Reload</span><br><span class="line">	bl	_objc_release</span><br><span class="line">	ldr	x0, [sp, #8]                    ; 8-byte Folded Reload</span><br><span class="line">	add	x0, x0, #32                     ; =32</span><br><span class="line">	bl	_objc_loadWeakRetained</span><br><span class="line">	ldr	x8, [sp, #16]                   ; 8-byte Folded Reload</span><br><span class="line">	str	x0, [sp, #24]                   ; 8-byte Folded Spill</span><br><span class="line">	ldr	x1, [x8, _OBJC_SELECTOR_REFERENCES_.2@PAGEOFF]</span><br><span class="line">	bl	_objc_msgSend</span><br><span class="line">	ldr	x0, [sp, #24]                   ; 8-byte Folded Reload</span><br><span class="line">	bl	_objc_release</span><br><span class="line">Ltmp9:</span><br><span class="line">	ldp	x29, x30, [sp, #48]             ; 16-byte Folded Reload</span><br><span class="line">	add	sp, sp, #64                     ; =64</span><br><span class="line">	ret</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">bl	_objc_loadWeakRetained</span><br><span class="line">str	x0, [sp]                        ; 8-byte Folded Spill</span><br><span class="line">adrp	x8, _OBJC_SELECTOR_REFERENCES_.2@PAGE</span><br><span class="line">str	x8, [sp, #16]                   ; 8-byte Folded Spill</span><br><span class="line">ldr	x1, [x8, _OBJC_SELECTOR_REFERENCES_.2@PAGEOFF]</span><br><span class="line">bl	_objc_msgSend</span><br><span class="line">ldr	x0, [sp]                        ; 8-byte Folded Reload</span><br><span class="line">bl	_objc_release</span><br></pre></td></tr></table></figure>
+
+<p>从这块片段可以看到在引用wself时，先调用了objc_loadWeakRetained，refcnt + 1。然后通过objc_msgSend调用了具体的方法，接着调用了objc_release，refcnt - 1。可以看到苹果底层在引用weak时还是比较严谨的。</p>
+<p>可以看到在引用两次wself时，每次引用都会先调用objc_loadWeakRetained，紧接着调用objc_msgSend。在多线程的场景下，两次引用中间self存在被释放的情况，当self被释放后，wself就会被weak系统机制置为nil，从而导致在block的执行过程中self被释放，从而导致一些错误。</p>
+<p>接着看一下使用strong修饰后的结果。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="type">void</span>)foo &#123;</span><br><span class="line">    __<span class="keyword">weak</span> Foo *wself = <span class="keyword">self</span>;</span><br><span class="line">    <span class="keyword">self</span>.myBlock = ^&#123;</span><br><span class="line">        __<span class="keyword">strong</span> Foo *sself = wself;</span><br><span class="line">        [sself foo];</span><br><span class="line">        [sself foo];</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>assemble:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">&quot;___10-[Foo foo]_block_invoke&quot;:         ; @&quot;__10-[Foo foo]_block_invoke&quot;</span><br><span class="line">Lfunc_begin1:</span><br><span class="line">; %bb.0:</span><br><span class="line">	sub	sp, sp, #64                     ; =64</span><br><span class="line">	stp	x29, x30, [sp, #48]             ; 16-byte Folded Spill</span><br><span class="line">	add	x29, sp, #48                    ; =48</span><br><span class="line">	stur	x0, [x29, #-8]</span><br><span class="line">	stur	x0, [x29, #-16]</span><br><span class="line">Ltmp5:</span><br><span class="line">	add	x0, x0, #32                     ; =32</span><br><span class="line">	bl	_objc_loadWeakRetained</span><br><span class="line">	add	x8, sp, #24                     ; =24</span><br><span class="line">	str	x8, [sp, #16]                   ; 8-byte Folded Spill</span><br><span class="line">	str	x0, [sp, #24]</span><br><span class="line">	ldr	x0, [sp, #24]</span><br><span class="line">	adrp	x8, _OBJC_SELECTOR_REFERENCES_@PAGE</span><br><span class="line">	str	x8, [sp, #8]                    ; 8-byte Folded Spill</span><br><span class="line">	ldr	x1, [x8, _OBJC_SELECTOR_REFERENCES_@PAGEOFF]</span><br><span class="line">	bl	_objc_msgSend</span><br><span class="line">	ldr	x8, [sp, #8]                    ; 8-byte Folded Reload</span><br><span class="line">	ldr	x0, [sp, #24]</span><br><span class="line">	ldr	x1, [x8, _OBJC_SELECTOR_REFERENCES_@PAGEOFF]</span><br><span class="line">	bl	_objc_msgSend</span><br><span class="line">	ldr	x0, [sp, #16]                   ; 8-byte Folded Reload</span><br><span class="line">	mov	x1, #0</span><br><span class="line">Ltmp6:</span><br><span class="line">	bl	_objc_storeStrong</span><br><span class="line">	ldp	x29, x30, [sp, #48]             ; 16-byte Folded Reload</span><br><span class="line">	add	sp, sp, #64                     ; =64</span><br><span class="line">	ret</span><br></pre></td></tr></table></figure>
+
+<p>在加上strong修饰后，因为后续代码中都在引用sself，所以sself在最后才通过objc_storeStrong(&amp;sself, nil)的方式进行一次release。从而也保证了在block调用过程中，self的refcnt一直是+1的状态，在block执行过程中不存在被提前释放的情况。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/02/12/Mach-O%E6%B7%B7%E6%B7%86%E5%8E%9F%E7%90%86/" rel="prev" title="Mach-O混淆原理">
+                  <i class="fa fa-chevron-left"></i> Mach-O混淆原理
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/05/22/ARM%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="next" title="ARM学习笔记">
+                  ARM学习笔记 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jin.</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

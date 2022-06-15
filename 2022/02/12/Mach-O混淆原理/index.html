@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.12.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Mach-O混淆原理混淆流程1. 获取Mach-O解压ipa包，获取到可执行文件即Mach-O文件。 2. 修改类名修改Mach-O文件中的__objc_classname section中的类名字符串为等长度的替换字符串; 为了保证使用NSClassFromString函数可以正确的获取到原始类，这里记录修改以前的字符映射关系后续使用。 3. 重签名使用codesign，将ipa重签名 原理解析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mach-O混淆原理">
+<meta property="og:url" content="http://example.com/2022/02/12/Mach-O%E6%B7%B7%E6%B7%86%E5%8E%9F%E7%90%86/index.html">
+<meta property="og:site_name" content="一只代码狗的随笔">
+<meta property="og:description" content="Mach-O混淆原理混淆流程1. 获取Mach-O解压ipa包，获取到可执行文件即Mach-O文件。 2. 修改类名修改Mach-O文件中的__objc_classname section中的类名字符串为等长度的替换字符串; 为了保证使用NSClassFromString函数可以正确的获取到原始类，这里记录修改以前的字符映射关系后续使用。 3. 重签名使用codesign，将ipa重签名 原理解析">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-02-12T14:43:00.000Z">
+<meta property="article:modified_time" content="2022-06-15T08:32:04.791Z">
+<meta property="article:author" content="Jin.">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2022/02/12/Mach-O%E6%B7%B7%E6%B7%86%E5%8E%9F%E7%90%86/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://example.com/2022/02/12/Mach-O%E6%B7%B7%E6%B7%86%E5%8E%9F%E7%90%86/","path":"2022/02/12/Mach-O混淆原理/","title":"Mach-O混淆原理"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Mach-O混淆原理 | 一只代码狗的随笔</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">一只代码狗的随笔</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">知其然知其所以然！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Mach-O%E6%B7%B7%E6%B7%86%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">Mach-O混淆原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%B7%E6%B7%86%E6%B5%81%E7%A8%8B"><span class="nav-number">1.1.</span> <span class="nav-text">混淆流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E8%8E%B7%E5%8F%96Mach-O"><span class="nav-number">1.1.0.1.</span> <span class="nav-text">1. 获取Mach-O</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E4%BF%AE%E6%94%B9%E7%B1%BB%E5%90%8D"><span class="nav-number">1.1.0.2.</span> <span class="nav-text">2. 修改类名</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E9%87%8D%E7%AD%BE%E5%90%8D"><span class="nav-number">1.1.0.3.</span> <span class="nav-text">3. 重签名</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90"><span class="nav-number">1.2.</span> <span class="nav-text">原理解析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E5%90%8D%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">1.2.1.</span> <span class="nav-text">类名的作用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Disassembly"><span class="nav-number">1.3.</span> <span class="nav-text">Disassembly</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NSClassFromString"><span class="nav-number">1.4.</span> <span class="nav-text">NSClassFromString</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">1.5.</span> <span class="nav-text">结论</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jin.</p>
+  <div class="site-description" itemprop="description">知其然知其所以然！</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/12/Mach-O%E6%B7%B7%E6%B7%86%E5%8E%9F%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jin.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一只代码狗的随笔">
+      <meta itemprop="description" content="知其然知其所以然！">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Mach-O混淆原理 | 一只代码狗的随笔">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Mach-O混淆原理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2022-02-12 22:43:00" itemprop="dateCreated datePublished" datetime="2022-02-12T22:43:00+08:00">2022-02-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2022-06-15 16:32:04" itemprop="dateModified" datetime="2022-06-15T16:32:04+08:00">2022-06-15</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Mach-O混淆原理"><a href="#Mach-O混淆原理" class="headerlink" title="Mach-O混淆原理"></a>Mach-O混淆原理</h1><h2 id="混淆流程"><a href="#混淆流程" class="headerlink" title="混淆流程"></a>混淆流程</h2><h4 id="1-获取Mach-O"><a href="#1-获取Mach-O" class="headerlink" title="1. 获取Mach-O"></a>1. 获取Mach-O</h4><p>解压ipa包，获取到可执行文件即Mach-O文件。</p>
+<h4 id="2-修改类名"><a href="#2-修改类名" class="headerlink" title="2. 修改类名"></a>2. 修改类名</h4><p>修改Mach-O文件中的__objc_classname section中的类名字符串为等长度的替换字符串; 为了保证使用NSClassFromString函数可以正确的获取到原始类，这里记录修改以前的字符映射关系后续使用。</p>
+<h4 id="3-重签名"><a href="#3-重签名" class="headerlink" title="3. 重签名"></a>3. 重签名</h4><p>使用codesign，将ipa重签名</p>
+<h2 id="原理解析"><a href="#原理解析" class="headerlink" title="原理解析"></a>原理解析</h2><p>这里拿最简单的一个例子做介绍，源码如下：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#import <span class="string">&lt;Foundation/Foundation.h&gt;</span></span></span><br><span class="line"><span class="meta">#import <span class="string">&quot;Animal.h&quot;</span></span></span><br><span class="line"><span class="meta">#import <span class="string">&quot;Man.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> foo(<span class="type">void</span>);</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> main(<span class="type">int</span> argc, <span class="keyword">const</span> <span class="type">char</span> * argv[]) &#123;</span><br><span class="line">    <span class="keyword">@autoreleasepool</span> &#123;</span><br><span class="line">        [[Man alloc] init];</span><br><span class="line">        </span><br><span class="line">        [[Animal alloc] init];</span><br><span class="line">        </span><br><span class="line">        foo();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> foo() &#123;</span><br><span class="line">    Class cls = <span class="built_in">NSClassFromString</span>(<span class="string">@&quot;Man&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>代码中声明了两个类Animal和Man。然后main文件中调用了两个类个构造方法。很简单是吧~</p>
+<p>接下来，将项目打包，就可以获取到可执行文件了。</p>
+<h3 id="类名的作用"><a href="#类名的作用" class="headerlink" title="类名的作用"></a>类名的作用</h3><p>想想程序运行中什么时候会用到类名？</p>
+<p>程序在装载的时候构建了一个NXMapTable——<em>gdb_objc_realized_classes</em>，用于存放类，key是类名。runtime中objc_getClass函数就是从这个表中获取到对应名称的类。</p>
+<p>那么代码<code> [[Man alloc] init];</code>到底执行了什么？</p>
+<h2 id="Disassembly"><a href="#Disassembly" class="headerlink" title="Disassembly"></a>Disassembly</h2><p>使用hopper查看反编译后的汇编代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">0000000100003eaf         push       rbp</span><br><span class="line">0000000100003eb0         mov        rbp, rsp</span><br><span class="line">0000000100003eb3         push       r14</span><br><span class="line">0000000100003eb5         push       rbx</span><br><span class="line">0000000100003eb6         call       imp___stubs__objc_autoreleasePoolPush</span><br><span class="line">0000000100003ebb         mov        r14, rax</span><br><span class="line">0000000100003ebe         mov        rdi, qword [objc_cls_ref_Man]</span><br><span class="line">0000000100003ec5         call       imp___stubs__objc_alloc_init</span><br><span class="line">0000000100003eca         mov        rbx, qword [_objc_release_100004000]</span><br><span class="line">0000000100003ed1         mov        rdi, rax                                    ; argument &quot;instance&quot; for method _objc_release</span><br><span class="line">0000000100003ed4         call       rbx                                         ; _objc_release</span><br><span class="line">0000000100003ed6         mov        rdi, qword [objc_cls_ref_Animal]</span><br><span class="line">0000000100003edd         call       imp___stubs__objc_alloc_init</span><br><span class="line">0000000100003ee2         mov        rdi, rax                                    ; argument &quot;instance&quot; for method _objc_release</span><br><span class="line">0000000100003ee5         call       rbx                                         ; _objc_release</span><br><span class="line">0000000100003ee7         call       sub_100003efb</span><br><span class="line">0000000100003eec         mov        rdi, r14                                    ; argument &quot;pool&quot; for method imp___stubs__objc_autoreleasePoolPop</span><br><span class="line">0000000100003eef         call       imp___stubs__objc_autoreleasePoolPop</span><br><span class="line">0000000100003ef4         xor        eax, eax</span><br><span class="line">0000000100003ef6         pop        rbx</span><br><span class="line">0000000100003ef7         pop        r14</span><br><span class="line">0000000100003ef9         pop        rbp</span><br><span class="line">0000000100003efa         ret</span><br><span class="line">                        ; endp</span><br></pre></td></tr></table></figure>
+
+<p>可以看到在使用<code>alloc] init]</code>创建一个Man对象的时候，<code>__objc_alloc_init</code>函数的入参是<code>objc_cls_ref_Man</code>——类的引用。同命令行使用MachOView看到的内容如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">100003ebe    movq 0x42f3(%rip), %rdi</span><br><span class="line">100003ec5    callq &quot;[0x100003f26-&gt;__objc_alloc_init]&quot;</span><br></pre></td></tr></table></figure>
+
+<p>根据相对寻址得出rdi寄存器的内容为0x10003ec5 + 0x42f3 &#x3D; 0x100082b8。该地址的内容位于<code>__objc_classrefs</code> section, 如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1000081b8 0x1000081f8</span><br></pre></td></tr></table></figure>
+
+<p>指向的是<code>__objc_data</code> section，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">00000001000081d0         struct __objc_class &#123;                                  ; DATA XREF=__objc_class_Man_class</span><br><span class="line">                             _OBJC_METACLASS_$_NSObject,          // metaclass</span><br><span class="line">                             _OBJC_METACLASS_$_NSObject,          // superclass</span><br><span class="line">                             __objc_empty_cache,                  // cache</span><br><span class="line">                             0x0,                                 // vtable</span><br><span class="line">                             __objc_metaclass_Man_data            // data</span><br><span class="line">                         &#125;</span><br><span class="line">                             ; </span><br><span class="line">                             ; @class Man : NSObject &#123;</span><br><span class="line">                             ; &#125;</span><br><span class="line">                     __objc_class_Man_class:</span><br><span class="line">00000001000081f8         struct __objc_class &#123;                                  ; DATA XREF=0x100004030, objc_cls_ref_Man</span><br><span class="line">                             __objc_metaclass_Man_metaclass,      // metaclass</span><br><span class="line">                             _OBJC_CLASS_$_NSObject,              // superclass</span><br><span class="line">                             __objc_empty_cache,                  // cache</span><br><span class="line">                             0x0,                                 // vtable</span><br><span class="line">                             __objc_class_Man_data                // data</span><br><span class="line">                         &#125;</span><br><span class="line">                             ; </span><br><span class="line">                             ; @metaclass Animal  &#123;</span><br><span class="line">                             ; &#125;</span><br></pre></td></tr></table></figure>
+
+<p>到这里已经是Man类本身了。由此可见，类的创建跟classname无关（旧版本的sdk编译的时候alloc，init也是通过objc_msgsend调用的）。</p>
+<p>那么类名是什么时候被使用呢，然后在看下<code>__objc_class_Man_data</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"> __objc_class_Man_data:</span><br><span class="line">0000000100008068         struct __objc_data &#123;                                   ; &quot;Man&quot;, DATA XREF=__objc_class_Man_class</span><br><span class="line">                             0x90,                                // flags</span><br><span class="line">                             8,                                   // instance start</span><br><span class="line">                             8,                                   // instance size</span><br><span class="line">                             0x0,</span><br><span class="line">                             0x0,                                 // ivar layout</span><br><span class="line">                             0x100003f70,                         // name</span><br><span class="line">                             0x0,                                 // base methods</span><br><span class="line">                             0x0,                                 // base protocols</span><br><span class="line">                             0x0,                                 // ivars</span><br><span class="line">                             0x0,                                 // weak ivar layout</span><br><span class="line">                             0x0                                  // base properties</span><br><span class="line">                         &#125;</span><br></pre></td></tr></table></figure>
+
+<p>再看看name地址0x100003f70，该地址位于<code>__objc_classname</code> section。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">100003f70 4d 61 6e 00 ... # Man.</span><br></pre></td></tr></table></figure>
+
+<p>yes, name的地址的内容即为”Man”，寻找的类名。</p>
+<h2 id="NSClassFromString"><a href="#NSClassFromString" class="headerlink" title="NSClassFromString"></a>NSClassFromString</h2><p>让我们再来看看NSClassFromString方式拿到的类的汇编：</p>
+<p>Hopper:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">        ; ================ B E G I N N I N G   O F   P R O C E D U R E ================</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">                     sub_100003efb:</span><br><span class="line">0000000100003efb         push       rbp                                         ; CODE XREF=EntryPoint+56</span><br><span class="line">0000000100003efc         mov        rbp, rsp</span><br><span class="line">0000000100003eff         lea        rdi, qword [cfstring_Man]                   ; @&quot;Man&quot;, argument &quot;aClassName&quot; for method imp___stubs__NSClassFromString</span><br><span class="line">0000000100003f06         pop        rbp</span><br><span class="line">0000000100003f07         jmp        imp___stubs__NSClassFromString</span><br><span class="line">                        ; endp</span><br></pre></td></tr></table></figure>
+<p>再看看cfstring_Man</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">        ; Section __cfstring</span><br><span class="line">        ; Range: [0x100004010; 0x100004030[ (32 bytes)</span><br><span class="line">        ; File offset : [16400; 16432[ (32 bytes)</span><br><span class="line">        ;   S_REGULAR</span><br><span class="line"></span><br><span class="line">                     cfstring_Man:</span><br><span class="line">0000000100004010         dq         ___CFConstantStringClassReference, 0x7c8, 0x100003f7b, 0x3 ; &quot;Man&quot;, DATA XREF=sub_100003efb+4</span><br><span class="line"></span><br><span class="line">  			; Section __cstring</span><br><span class="line">        ; Range: [0x100003f7b; 0x100003f7f[ (4 bytes)</span><br><span class="line">        ; File offset : [16251; 16255[ (4 bytes)</span><br><span class="line">        ; Flags: 0x2</span><br><span class="line">        ;   S_CSTRING_LITERALS</span><br><span class="line"></span><br><span class="line">0000000100003f7b         db         &quot;Man&quot;, 0                                    ; DATA XREF=cfstring_Man</span><br></pre></td></tr></table></figure>
+
+<p>以上就不详细做寻址的步骤了，直接通过hopper可以看到，最终指向的<code>__cstring</code> section中的Man字符串。</p>
+<p>由此可以看出”Man“指向不是<code>__objc_classname</code>，而是<code>__cstring</code>。因此修改了<code>__objc_classname</code>后会影响原代码中NSClassFromString获取类。</p>
+<p>那么就会想到，把__cstring sectin中的类名也替换掉不就可以了吗？</p>
+<p>答案是不可以，<code>__cstring</code> section包含的是文件中所有的字符串，为了避免<strong>非NSClassFromString</strong>函数调用同样字符串异常，不能直接修改这个section。平替方案是使用宏替换原有代码中NSClassFromString的调用，用原有类名映射出混淆后的类名，然后调用NSClassFromString函数。这样场景的还有一些runtime的函数。</p>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>Mach-O混淆是通过修改<code>__objc_classname</code>段来修改类名。在程序运行中类名只是个符号，用来映射类。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/04/28/%E4%BD%BF%E7%94%A8electron+vue%E6%90%AD%E5%BB%BA%E4%B8%80%E4%B8%AA%E6%A1%8C%E9%9D%A2%E5%BA%94%E7%94%A8/" rel="prev" title="使用electron+vue搭建一个桌面应用">
+                  <i class="fa fa-chevron-left"></i> 使用electron+vue搭建一个桌面应用
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/05/19/%E4%BB%8E%E6%B1%87%E7%BC%96%E7%9C%8BBlock%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0%E5%8F%8A%E5%BE%AA%E7%8E%AF%E5%BC%95%E7%94%A8%E7%9A%84%E4%BA%A7%E7%94%9F/" rel="next" title="从汇编看Block底层">
+                  从汇编看Block底层 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jin.</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.12.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="LearnOpenGL笔记本文仅为学习OpenGL过程中的学习笔记，OpenGL细节参考https:&#x2F;&#x2F;learnopengl-cn.github.io&#x2F;。 OpenGL流水线​    在gl中坐标系是3D的，但是窗口却是2D像素数组，这导致gl大部分工作都是关于把3D坐标转变为适应屏幕的2D像素。3D坐标转为2D坐标的处理过程是由OpenGL的图形渲染管线（Graphics Pipeline，大">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LearnOpenGL笔记">
+<meta property="og:url" content="http://example.com/2022/06/13/LearnOpenGL%E5%B0%8F%E7%BB%93/index.html">
+<meta property="og:site_name" content="一只代码狗的随笔">
+<meta property="og:description" content="LearnOpenGL笔记本文仅为学习OpenGL过程中的学习笔记，OpenGL细节参考https:&#x2F;&#x2F;learnopengl-cn.github.io&#x2F;。 OpenGL流水线​    在gl中坐标系是3D的，但是窗口却是2D像素数组，这导致gl大部分工作都是关于把3D坐标转变为适应屏幕的2D像素。3D坐标转为2D坐标的处理过程是由OpenGL的图形渲染管线（Graphics Pipeline，大">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/24721415-4fa1d9bcbfa24ff1.png?imageMogr2/auto-orient/strip%7CimageView2/2/format/webp">
+<meta property="og:image" content="https://learnopengl-cn.github.io/img/03/01/assimp_structure.png">
+<meta property="article:published_time" content="2022-06-13T15:20:58.488Z">
+<meta property="article:modified_time" content="2022-06-15T08:28:19.447Z">
+<meta property="article:author" content="Jin.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/24721415-4fa1d9bcbfa24ff1.png?imageMogr2/auto-orient/strip%7CimageView2/2/format/webp">
+
+
+<link rel="canonical" href="http://example.com/2022/06/13/LearnOpenGL%E5%B0%8F%E7%BB%93/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://example.com/2022/06/13/LearnOpenGL%E5%B0%8F%E7%BB%93/","path":"2022/06/13/LearnOpenGL小结/","title":"LearnOpenGL笔记"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>LearnOpenGL笔记 | 一只代码狗的随笔</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">一只代码狗的随笔</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">知其然知其所以然！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#LearnOpenGL%E7%AC%94%E8%AE%B0"><span class="nav-number">1.</span> <span class="nav-text">LearnOpenGL笔记</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#OpenGL%E6%B5%81%E6%B0%B4%E7%BA%BF"><span class="nav-number">1.1.</span> <span class="nav-text">OpenGL流水线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9D%80%E8%89%B2%E5%99%A8"><span class="nav-number">1.2.</span> <span class="nav-text">着色器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B6%E7%82%B9%E7%9D%80%E8%89%B2%E5%99%A8"><span class="nav-number">1.2.1.</span> <span class="nav-text">顶点着色器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%87%E6%AE%B5%E7%9D%80%E8%89%B2%E5%99%A8"><span class="nav-number">1.2.2.</span> <span class="nav-text">片段着色器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%A0%E4%BD%95%E7%9D%80%E8%89%B2%E5%99%A8"><span class="nav-number">1.2.3.</span> <span class="nav-text">几何着色器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%B9%E7%90%86"><span class="nav-number">1.3.</span> <span class="nav-text">纹理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9D%90%E6%A0%87%E7%B3%BB%E7%BB%9F"><span class="nav-number">1.4.</span> <span class="nav-text">坐标系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%89%E7%85%A7%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.5.</span> <span class="nav-text">光照模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3D%E6%A8%A1%E5%9E%8B%E6%95%B0%E6%8D%AE"><span class="nav-number">1.6.</span> <span class="nav-text">3D模型数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%A6%E4%B9%A0%E7%BD%91%E7%AB%99"><span class="nav-number">1.7.</span> <span class="nav-text">学习网站</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jin.</p>
+  <div class="site-description" itemprop="description">知其然知其所以然！</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/13/LearnOpenGL%E5%B0%8F%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jin.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一只代码狗的随笔">
+      <meta itemprop="description" content="知其然知其所以然！">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="LearnOpenGL笔记 | 一只代码狗的随笔">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          LearnOpenGL笔记
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2022-06-13 23:20:58" itemprop="dateCreated datePublished" datetime="2022-06-13T23:20:58+08:00">2022-06-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2022-06-15 16:28:19" itemprop="dateModified" datetime="2022-06-15T16:28:19+08:00">2022-06-15</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="LearnOpenGL笔记"><a href="#LearnOpenGL笔记" class="headerlink" title="LearnOpenGL笔记"></a>LearnOpenGL笔记</h1><p>本文仅为学习OpenGL过程中的学习笔记，OpenGL细节参考<a target="_blank" rel="noopener" href="https://learnopengl-cn.github.io/%E3%80%82">https://learnopengl-cn.github.io/。</a></p>
+<h2 id="OpenGL流水线"><a href="#OpenGL流水线" class="headerlink" title="OpenGL流水线"></a>OpenGL流水线</h2><p>​    在gl中坐标系是3D的，但是窗口却是2D像素数组，这导致gl大部分工作都是关于把3D坐标转变为适应屏幕的2D像素。3D坐标转为2D坐标的处理过程是由OpenGL的图形渲染管线（Graphics Pipeline，大多译为管线，指的是一堆原始图形数据途经一个输送管道，期间经过各种变化处理最终出现在屏幕的过程）管理的。图形渲染管线可以被划分为两个主要部分：第一部分把你的3D坐标转换为2D坐标（几何阶段）；第二部分是把2D坐标转变为实际的有颜色的像素(光栅化阶段)。</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/24721415-4fa1d9bcbfa24ff1.png?imageMogr2/auto-orient/strip%7CimageView2/2/format/webp" alt="img"></p>
+<h2 id="着色器"><a href="#着色器" class="headerlink" title="着色器"></a><strong>着色器</strong></h2><p>着色器(Shader)是运行在GPU上的小程序。这些小程序为图形渲染管线的某个特定部分而运行。从基本意义上来说，着色器只是一种把输入转化为输出的程序。着色器也是一种非常独立的程序，因为它们之间不能相互通信；它们之间唯一的沟通只有通过输入和输出。着色器程序是由GLSL语言编写，openGL会编译成具体的着色程序。常规的着色器有以下几种。顶点和片段着色器是最常用的着色器程序。</p>
+<ul>
+<li><p>顶点着色器</p>
+</li>
+<li><p>几何着色器</p>
+</li>
+<li><p>片段着色器</p>
+</li>
+</ul>
+<h3 id="顶点着色器"><a href="#顶点着色器" class="headerlink" title="顶点着色器"></a>顶点着色器</h3><p>顶点着色器作为顶点数据的入口，顶点数据一般包含位置坐标（xyz轴），纹理坐标，法向量（normal），tangent（切线），副切线（bitangent）。</p>
+<p>顶点着色器应该接收的是一种特殊形式的输入。client会通过openGL来声明好顶点数据的结构，顶点着色器程序就可以访问到相应偏移量的数据，顶点着色器作为第一个着色器，将处理好的数据传递传递给下一个着色器。关键字<code>in</code>，<code> out</code>描述着色器的输入输出。</p>
+<h3 id="片段着色器"><a href="#片段着色器" class="headerlink" title="片段着色器"></a>片段着色器</h3><p>片段着色器需要生成一个最终输出的颜色。如果你在片段着色器没有定义输出颜色，OpenGL会把你的物体渲染为黑色（或白色）。片段着色器的主要作用就是描述片段的颜色（可以理解为像素点）。实际使用过程中会配合纹理使用，同时也会涉及到光学模型，让渲染的结果更逼真。</p>
+<p>片段着色器的输入由上一个着色器提供，一般为顶点着色器。</p>
+<h3 id="几何着色器"><a href="#几何着色器" class="headerlink" title="几何着色器"></a>几何着色器</h3><p>几何着色器处理的是图元。比如说渲染的方式是三角形，则输入的是3个顶点数据。几何着色器可以在顶点发送到下一着色器阶段之前对它们随意变换。然而，几何着色器最有趣的地方在于，它能够将（这一组）顶点变换为完全不同的图元，并且还能生成比原来更多的顶点。</p>
+<p>几何着色器可以实现法向量可视化，毛发等细节效果。</p>
+<h2 id="纹理"><a href="#纹理" class="headerlink" title="纹理"></a>纹理</h2><p>diffuse，specular，normal，depth</p>
+<p>纹理是一个2D图片（甚至也有1D和3D的纹理），它可以用来添加物体的细节；你可以想象纹理是一张绘有砖块的纸，无缝折叠贴合到你的3D的房子上，这样你的房子看起来就像有砖墙外表了。因为我们可以在一张图片上插入非常多的细节，<u>这样就可以让物体非常精细而不用指定额外的顶点</u>。</p>
+<p>使用纹理坐标获取纹理颜色叫做<strong>采样</strong>，纹理坐标[0, 1]。</p>
+<p>纹理的资源叫做贴图，其实就是图片。常规的贴图有以下几种：</p>
+<ul>
+<li>漫反射贴图</li>
+<li>镜面光贴图</li>
+<li>法线贴图</li>
+<li>视差贴图</li>
+<li>放射光贴图</li>
+</ul>
+<p>具体细节在光照模型中会具体描述，物理的颜色主要取决于反射或射入我们眼睛中颜色决定。</p>
+<p><strong>切线空间</strong></p>
+<p>在一个不同的坐标空间中进行光照，这个坐标空间里，法线贴图向量总是指向这个坐标空间的正z方向；所有的光照向量都相对与这个正z方向进行变换。这样我们就能始终使用同样的法线贴图，不管朝向问题。这个坐标空间叫做切线空间（tangent space）。</p>
+<p>法线贴图中的法线向量定义在切线空间中，在切线空间中，法线永远指着正z方向。切线空间是位于三角形表面之上的空间：法线相对于单个三角形的本地参考框架。它就像法线贴图向量的本地空间；它们都被定义为指向正z方向，无论最终变换到什么方向。使用一个特定的矩阵我们就能将本地&#x2F;切线空间中的法线向量转成世界或视图空间下，使它们转向到最终的贴图表面的方向。</p>
+<p>使用法线贴图也是一种提升你的场景的表现的重要方式。在使用法线贴图之前你不得不使用相当多的顶点才能表现出一个更精细的网格，但使用了法线贴图我们可以使用更少的顶点表现出同样丰富的细节。</p>
+<h2 id="坐标系统"><a href="#坐标系统" class="headerlink" title="坐标系统"></a>坐标系统</h2><p>标准化设备坐标(Normalized Device Coordinate, NDC)。也就是说，每个顶点的<strong>x</strong>，<strong>y</strong>，<strong>z</strong>坐标都应该在**-1.0<strong>到</strong>1.0**之间，超出这个坐标范围的顶点都将不可见。我们通常会自己设定一个坐标的范围，之后再在顶点着色器中将这些坐标变换为标准化设备坐标。然后将这些标准化设备坐标传入光栅器(Rasterizer)，将它们变换为屏幕上的二维坐标或像素。</p>
+<p>将坐标变换为标准化设备坐标，接着再转化为屏幕坐标的过程通常是分步进行的，也就是类似于流水线那样子。在流水线中，物体的顶点在最终转化为屏幕坐标之前还会被变换到多个坐标系统(Coordinate System)。将物体的坐标变换到几个<strong>过渡</strong>坐标系(Intermediate Coordinate System)的优点在于，在这些特定的坐标系统中，一些操作或运算更加方便和容易，这一点很快就会变得很明显。对我们来说比较重要的总共有5个不同的坐标系统：</p>
+<ul>
+<li>局部空间(Local Space，或者称为物体空间(Object Space))</li>
+<li>世界空间(World Space)</li>
+<li>观察空间(View Space，或者称为视觉空间(Eye Space))</li>
+<li>裁剪空间(Clip Space)</li>
+<li>屏幕空间(Screen Space)</li>
+</ul>
+<p>为了将坐标从一个坐标系变换到另一个坐标系，我们需要用到几个变换矩阵，最重要的几个分别是模型(Model)、观察(View)、投影(Projection)三个矩阵。有了上述3个变化矩阵，就可以实现旋转，平移等效果。</p>
+<h2 id="光照模型"><a href="#光照模型" class="headerlink" title="光照模型"></a>光照模型</h2><p>冯氏光照模型(Phong Lighting Model)。冯氏光照模型的主要结构由3个分量组成：环境(Ambient)、漫反射(Diffuse)和镜面(Specular)光照。物体的颜色则为3个分量的向量和。</p>
+<ul>
+<li>环境光照(Ambient Lighting)：即使在黑暗的情况下，世界上通常也仍然有一些光亮（月亮、远处的光），所以物体几乎永远不会是完全黑暗的。为了模拟这个，我们会使用一个环境光照常量，它永远会给物体一些颜色。</li>
+<li>漫反射光照(Diffuse Lighting)：模拟光源对物体的方向性影响(Directional Impact)。它是冯氏光照模型中视觉上最显著的分量。物体的某一部分越是正对着光源，它就会越亮。</li>
+<li>镜面光照(Specular Lighting)：模拟有光泽物体上面出现的亮点。镜面光照的颜色相比于物体的颜色会更倾向于光的颜色。</li>
+</ul>
+<p>漫反射和镜面光照都和片段表面的法向量和光线向量的夹角相关，需要通过计算获得具体的计算因子。</p>
+<p>除冯氏光照模型外，在冯氏模型的拓展还有<em>Blinn-Phong</em>着色模型，引入了半程向量概念，在镜面反射分量上有一个更好的表现。</p>
+<h2 id="3D模型数据"><a href="#3D模型数据" class="headerlink" title="3D模型数据"></a>3D模型数据</h2><p>3D文件通常包括网格模型、UV纹理、材质贴图。常见的3D模型格式有如下几种</p>
+<ul>
+<li>OBJ，适用于3D软件模型之间的互导，主要支持多边形模型。</li>
+<li>DAE，纯文本的模型格式，其本质是一个xml文件，可以实现动态模型。</li>
+<li>FBX，最好的互导方案</li>
+<li>STL，文件格式简单， 应用非常广泛</li>
+</ul>
+<p>一个非常流行的模型导入库是<a target="_blank" rel="noopener" href="http://assimp.org/">Assimp</a>。当使用Assimp导入一个模型的时候，它通常会将整个模型加载进一个<strong>场景</strong>(Scene)对象，它会包含导入的模型&#x2F;场景中的所有数据。Assimp会将场景载入为一系列的节点(Node)，每个节点包含了场景对象中所储存数据的索引，每个节点都可以有任意数量的子节点。Assimp数据结构的（简化）模型如下：</p>
+<p><img src="https://learnopengl-cn.github.io/img/03/01/assimp_structure.png" alt="img"></p>
+<ul>
+<li>和材质和网格(Mesh)一样，所有的场景&#x2F;模型数据都包含在Scene对象中。Scene对象也包含了场景根节点的引用。</li>
+<li>场景的Root node（根节点）可能包含子节点（和其它的节点一样），它会有一系列指向场景对象中mMeshes数组中储存的网格数据的索引。Scene下的mMeshes数组储存了真正的Mesh对象，节点中的mMeshes数组保存的只是场景中网格数组的索引。</li>
+<li>一个Mesh对象本身包含了渲染所需要的所有相关数据，像是顶点位置、法向量、纹理坐标、面(Face)和物体的材质。</li>
+<li>一个网格包含了多个面。Face代表的是物体的渲染图元(Primitive)（三角形、方形、点）。一个面包含了组成图元的顶点的索引。由于顶点和索引是分开的，使用一个索引缓冲来渲染是非常简单的（见[你好，三角形](<a target="_blank" rel="noopener" href="https://learnopengl-cn.github.io/01">https://learnopengl-cn.github.io/01</a> Getting started&#x2F;04 Hello Triangle&#x2F;)）。</li>
+<li>最后，一个网格也包含了一个Material对象，它包含了一些函数能让我们获取物体的材质属性，比如说颜色和纹理贴图（比如漫反射和镜面光贴图）。</li>
+</ul>
+<h2 id="学习网站"><a href="#学习网站" class="headerlink" title="学习网站"></a>学习网站</h2><p><a target="_blank" rel="noopener" href="https://learnopengl-cn.github.io/">https://learnopengl-cn.github.io/</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/05/22/ARM%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="prev" title="ARM学习笔记">
+                  <i class="fa fa-chevron-left"></i> ARM学习笔记
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jin.</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

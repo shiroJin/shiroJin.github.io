@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.12.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="&amp;emsp;electron 是一个可以使用 web 技术来创建跨平台原生桌面应用的框架。借助 electron ，我们可以使用纯 JavaScript 来调用丰富的原生 APIs。优点：可以开发跨平台应用；成熟的社区；图形化的开发。缺点：应用体积过大；重型项目性能问题。 &amp;emsp;electron 核心的部分就是两个进程之间的协作——主进程和渲染进程。进程之间通过 ipcMai">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用electron+vue搭建一个桌面应用">
+<meta property="og:url" content="http://example.com/2020/04/28/%E4%BD%BF%E7%94%A8electron+vue%E6%90%AD%E5%BB%BA%E4%B8%80%E4%B8%AA%E6%A1%8C%E9%9D%A2%E5%BA%94%E7%94%A8/index.html">
+<meta property="og:site_name" content="一只代码狗的随笔">
+<meta property="og:description" content="&amp;emsp;electron 是一个可以使用 web 技术来创建跨平台原生桌面应用的框架。借助 electron ，我们可以使用纯 JavaScript 来调用丰富的原生 APIs。优点：可以开发跨平台应用；成熟的社区；图形化的开发。缺点：应用体积过大；重型项目性能问题。 &amp;emsp;electron 核心的部分就是两个进程之间的协作——主进程和渲染进程。进程之间通过 ipcMai">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/shiroJin/image-storage/master/electron_1.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/shiroJin/image-storage/master/electron_2.jpg">
+<meta property="article:published_time" content="2020-04-27T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-04-27T16:00:00.000Z">
+<meta property="article:author" content="Jin.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/shiroJin/image-storage/master/electron_1.jpg">
+
+
+<link rel="canonical" href="http://example.com/2020/04/28/%E4%BD%BF%E7%94%A8electron+vue%E6%90%AD%E5%BB%BA%E4%B8%80%E4%B8%AA%E6%A1%8C%E9%9D%A2%E5%BA%94%E7%94%A8/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://example.com/2020/04/28/%E4%BD%BF%E7%94%A8electron+vue%E6%90%AD%E5%BB%BA%E4%B8%80%E4%B8%AA%E6%A1%8C%E9%9D%A2%E5%BA%94%E7%94%A8/","path":"2020/04/28/使用electron+vue搭建一个桌面应用/","title":"使用electron+vue搭建一个桌面应用"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>使用electron+vue搭建一个桌面应用 | 一只代码狗的随笔</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">一只代码狗的随笔</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">知其然知其所以然！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%90%AD%E5%BB%BA%E5%9F%BA%E7%A1%80%E7%9A%84electron-vue%E9%A1%B9%E7%9B%AE"><span class="nav-number">1.</span> <span class="nav-text">搭建基础的electron+vue项目</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEbackground-js"><span class="nav-number">2.</span> <span class="nav-text">配置background.js</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#GUI%E5%BC%80%E5%8F%91"><span class="nav-number">3.</span> <span class="nav-text">GUI开发</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#webview%E6%A0%87%E7%AD%BE"><span class="nav-number">4.</span> <span class="nav-text">webview标签</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%93%E5%8C%85"><span class="nav-number">5.</span> <span class="nav-text">打包</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jin.</p>
+  <div class="site-description" itemprop="description">知其然知其所以然！</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/04/28/%E4%BD%BF%E7%94%A8electron+vue%E6%90%AD%E5%BB%BA%E4%B8%80%E4%B8%AA%E6%A1%8C%E9%9D%A2%E5%BA%94%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jin.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一只代码狗的随笔">
+      <meta itemprop="description" content="知其然知其所以然！">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="使用electron+vue搭建一个桌面应用 | 一只代码狗的随笔">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用electron+vue搭建一个桌面应用
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-04-28 00:00:00" itemprop="dateCreated datePublished" datetime="2020-04-28T00:00:00+08:00">2020-04-28</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>&amp;emsp;<a target="_blank" rel="noopener" href="https://electronjs.org/">electron</a> 是一个可以使用 web 技术来创建跨平台原生桌面应用的框架。借助 <a target="_blank" rel="noopener" href="https://electronjs.org/">electron</a> ，我们可以使用纯 JavaScript 来调用丰富的原生 APIs。优点：可以开发跨平台应用；成熟的社区；图形化的开发。缺点：应用体积过大；重型项目性能问题。</p>
+<p>&amp;emsp;<a target="_blank" rel="noopener" href="https://electronjs.org/">electron</a> 核心的部分就是两个进程之间的协作——主进程和渲染进程。进程之间通过 ipcMain 和 ipcRenderer 来进行通信。<span id="more"></span></p>
+<blockquote>
+<p>主进程：在 electron 里面，运行main 脚本的进程成为主进程。主进程控制整个应用的生命周期，在主进程中可以创建 Web 形式的 GUI，而且整个 Node API 是内置其中。</p>
+<p>渲染进程：每个 electron 的页面都运行着自己的进程。</p>
+</blockquote>
+<p>&amp;emsp;与其他桌面应用开发框架，例如qt，c#语言等相比，electron的开发速度更快，跨平台能力更强大。</p>
+<hr>
+<h4 id="搭建基础的electron-vue项目"><a href="#搭建基础的electron-vue项目" class="headerlink" title="搭建基础的electron+vue项目"></a>搭建基础的electron+vue项目</h4><ol>
+<li>搭建基础vue项目</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vue new desktop-app</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>引入electron-builder</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vue add electron-builder</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>运行APP</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vue run electron:serve</span><br></pre></td></tr></table></figure>
+
+<p>运行效果如下图：</p>
+<p><img src="https://raw.githubusercontent.com/shiroJin/image-storage/master/electron_1.jpg" alt="browser"></p>
+<h4 id="配置background-js"><a href="#配置background-js" class="headerlink" title="配置background.js"></a>配置background.js</h4><ol>
+<li>设置窗口大小</li>
+</ol>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">win = <span class="keyword">new</span> <span class="title class_">BrowserWindow</span>(&#123;</span><br><span class="line">  <span class="attr">width</span>: <span class="number">800</span>, <span class="comment">// 设置窗口的宽</span></span><br><span class="line">  <span class="attr">height</span>: <span class="number">600</span>, <span class="comment">// 设置窗口的高</span></span><br><span class="line">  <span class="comment">// fullscreen: true, 是否设置全屏显示</span></span><br><span class="line">  <span class="attr">webPreferences</span>: &#123;</span><br><span class="line">    <span class="attr">nodeIntegration</span>: <span class="literal">true</span> <span class="comment">// 是否完整支持node</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>跨域安全设置</li>
+</ol>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">win = <span class="keyword">new</span> <span class="title class_">BrowserWindow</span>(&#123;</span><br><span class="line">  <span class="attr">webviewTag</span>: <span class="literal">true</span>, <span class="comment">// 是否使用webview标签</span></span><br><span class="line">  <span class="attr">fullscreen</span>: <span class="literal">true</span>, <span class="comment">// 使用全屏</span></span><br><span class="line">  <span class="attr">webPreferences</span>: &#123;</span><br><span class="line">    <span class="attr">webSecurity</span>: <span class="literal">false</span>, <span class="comment">// 是否禁用浏览器的跨域安全特性</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>开发工具配置</li>
+</ol>
+<p>window的webContents属性调用openDevTools方法就能唤起开发者工具，webview标签的开发者工具也同理。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (!process.<span class="property">env</span>.<span class="property">IS_TEST</span>) win.<span class="property">webContents</span>.<span class="title function_">openDevTools</span>()</span><br></pre></td></tr></table></figure>
+
+<h4 id="GUI开发"><a href="#GUI开发" class="headerlink" title="GUI开发"></a>GUI开发</h4><p>​	界面开发的流程跟vue项目一致，electron将编译好的资源文件打包进了自己的APP，所以一些资源的路径设置，例如public目录下的资源访问，图片资源的路径等等。electron也提供了加载外部h5页面的标签——webview。</p>
+<p>​	简单的做一个浏览器的示例，在APP.vue中布局基本的导航页，然后内嵌一个webview。</p>
+<h4 id="webview标签"><a href="#webview标签" class="headerlink" title="webview标签"></a>webview标签</h4><p>​	使用 <code>webview</code> 标签在Electron 应用中嵌入 “外来” 内容 (如 网页)。外来”内容包含在 <code>webview</code> 容器中。 应用中的嵌入页面可以控制外来内容的布局和重绘。</p>
+<p>​	与 <code>iframe</code> 不同, <code>webview</code> 在与应用程序不同的进程中运行。它与您的网页没有相同的权限, 应用程序和嵌入内容之间的所有交互都将是异步的。 这将保证你的应用对于嵌入的内容的安全性。 <strong>注意:</strong> 从宿主页上调用 webview 的方法大多数都需要对主进程进行同步调用。</p>
+<p>​	<code>webview</code>标签使用示例如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;webview id=&quot;foo&quot; src=&quot;https://www.github.com/&quot; style=&quot;display:inline-flex; width:640px; height:480px&quot;&gt;&lt;/webview&gt;</span><br></pre></td></tr></table></figure>
+
+<p>​	在script写用于侦听 <code>webview</code> 事件的 JavaScript, 并使用 <code>webview</code> 方法响应这些事件。 下面是包含两个事件侦听器的示例代码: 一个侦听网页开始加载, 另一个用于网页停止加载, 并在加载时显示 “loading…” 消息:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">  onload = () =&gt; &#123;</span><br><span class="line">    const webview = document.querySelector(&#x27;webview&#x27;)</span><br><span class="line">    const indicator = document.querySelector(&#x27;.indicator&#x27;)</span><br><span class="line">    const loadstart = () =&gt; &#123;</span><br><span class="line">      indicator.innerText = &#x27;loading...&#x27;</span><br><span class="line">    &#125;</span><br><span class="line">    const loadstop = () =&gt; &#123;</span><br><span class="line">      indicator.innerText = &#x27;&#x27;</span><br><span class="line">    &#125;</span><br><span class="line">    webview.addEventListener(&#x27;did-start-loading&#x27;, loadstart)</span><br><span class="line">    webview.addEventListener(&#x27;did-stop-loading&#x27;, loadstop)</span><br><span class="line">  &#125;</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<p>​	webview处理openUrl、a标签等打开新标签页的处理不是很完善。需要自行拦截新窗口事件然后自行打开窗口或者在当前标签页内加载。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">webview.<span class="title function_">addEventListener</span>(<span class="string">&#x27;new-window&#x27;</span>, <span class="function">(<span class="params">event</span>) =&gt;</span> &#123;</span><br><span class="line">  webview.<span class="title function_">loadURL</span>(event.<span class="property">url</span>)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>具体api请参考<a target="_blank" rel="noopener" href="https://www.electronjs.org/docs/api/webview-tag">https://www.electronjs.org/docs/api/webview-tag</a></p>
+<p>效果如图：</p>
+<p><img src="https://raw.githubusercontent.com/shiroJin/image-storage/master/electron_2.jpg" alt="browser"></p>
+<h4 id="打包"><a href="#打包" class="headerlink" title="打包"></a>打包</h4><p>​	执行完以下命令后，打包文件在项目根目录下<strong>dist_electron</strong>目录中，需要注意的是，mac系统只能打dmg文件、win系统只能打exe文件。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">npm run electron:build</span></span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/04/12/Ivar%E5%92%8C%E7%B1%BB%E5%AE%9E%E4%BE%8B%E7%9A%84%E5%86%85%E5%AD%98%E5%88%86%E5%B8%83/" rel="prev" title="Ivar和类实例的内存分布">
+                  <i class="fa fa-chevron-left"></i> Ivar和类实例的内存分布
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/02/12/Mach-O%E6%B7%B7%E6%B7%86%E5%8E%9F%E7%90%86/" rel="next" title="Mach-O混淆原理">
+                  Mach-O混淆原理 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jin.</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

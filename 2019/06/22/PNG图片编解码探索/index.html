@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.12.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="在应用开发过程中会碰到加载大图占用内存过多导致内存溢出的情况。一张图片占用的内存大小是有迹可循的。比如一个RGBA的像素，占用的内存大小为4byte。一张100x100像素的图片解压缩后占用的内存大小大约为100x100x4byte的内存（这里暂时不考虑图片信息之类的内存占用，仅举例说明）。 对于一个手机应用来说，图片显示的区域不会太大。假如图片显示的区域为1000x1000pixel，显示的图片">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PNG图片编解码探索">
+<meta property="og:url" content="http://example.com/2019/06/22/PNG%E5%9B%BE%E7%89%87%E7%BC%96%E8%A7%A3%E7%A0%81%E6%8E%A2%E7%B4%A2/index.html">
+<meta property="og:site_name" content="一只代码狗的随笔">
+<meta property="og:description" content="在应用开发过程中会碰到加载大图占用内存过多导致内存溢出的情况。一张图片占用的内存大小是有迹可循的。比如一个RGBA的像素，占用的内存大小为4byte。一张100x100像素的图片解压缩后占用的内存大小大约为100x100x4byte的内存（这里暂时不考虑图片信息之类的内存占用，仅举例说明）。 对于一个手机应用来说，图片显示的区域不会太大。假如图片显示的区域为1000x1000pixel，显示的图片">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-06-21T16:00:00.000Z">
+<meta property="article:modified_time" content="2019-06-21T16:00:00.000Z">
+<meta property="article:author" content="Jin.">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2019/06/22/PNG%E5%9B%BE%E7%89%87%E7%BC%96%E8%A7%A3%E7%A0%81%E6%8E%A2%E7%B4%A2/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://example.com/2019/06/22/PNG%E5%9B%BE%E7%89%87%E7%BC%96%E8%A7%A3%E7%A0%81%E6%8E%A2%E7%B4%A2/","path":"2019/06/22/PNG图片编解码探索/","title":"PNG图片编解码探索"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>PNG图片编解码探索 | 一只代码狗的随笔</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">一只代码狗的随笔</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">知其然知其所以然！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#PNG%E6%A0%BC%E5%BC%8F%E5%9B%BE%E7%89%87"><span class="nav-number">1.</span> <span class="nav-text">PNG格式图片</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">1.1.</span> <span class="nav-text">数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%9D%97%E7%BB%93%E6%9E%84"><span class="nav-number">1.1.1.</span> <span class="nav-text">数据块结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Chunk-Type"><span class="nav-number">1.1.2.</span> <span class="nav-text">Chunk Type</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PNG-Datasteam"><span class="nav-number">1.2.</span> <span class="nav-text">PNG Datasteam</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#compression-method-x2F-flags-code"><span class="nav-number">1.2.0.0.1.</span> <span class="nav-text">compression method&#x2F;flags code</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Additional-flags-x2F-check-bits"><span class="nav-number">1.2.0.0.2.</span> <span class="nav-text">Additional flags&#x2F;check bits</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Compressed-data-blocks"><span class="nav-number">1.2.0.0.3.</span> <span class="nav-text">Compressed data blocks</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Check-value"><span class="nav-number">1.2.0.0.4.</span> <span class="nav-text">Check value</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Block%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.1.</span> <span class="nav-text">Block结构</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Non-compressed-block-BTYPE-x3D-00"><span class="nav-number">1.2.1.0.1.</span> <span class="nav-text">Non-compressed block (BTYPE&#x3D;00)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Compressed-with-fixed-Huffman-codes-BTYPE-x3D-01-amp-Compressed-with-dynamic-Huffman-codes-BTYPE-x3D-10"><span class="nav-number">1.2.1.0.2.</span> <span class="nav-text">Compressed with fixed Huffman codes (BTYPE&#x3D;01) &amp; Compressed with dynamic Huffman codes (BTYPE&#x3D;10)</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#PNG%E5%9B%BE%E7%89%87%E8%A7%A3%E7%A0%81"><span class="nav-number">2.</span> <span class="nav-text">PNG图片解码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jin.</p>
+  <div class="site-description" itemprop="description">知其然知其所以然！</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2019/06/22/PNG%E5%9B%BE%E7%89%87%E7%BC%96%E8%A7%A3%E7%A0%81%E6%8E%A2%E7%B4%A2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jin.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一只代码狗的随笔">
+      <meta itemprop="description" content="知其然知其所以然！">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="PNG图片编解码探索 | 一只代码狗的随笔">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PNG图片编解码探索
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2019-06-22 00:00:00" itemprop="dateCreated datePublished" datetime="2019-06-22T00:00:00+08:00">2019-06-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>在应用开发过程中会碰到加载大图占用内存过多导致内存溢出的情况。一张图片占用的内存大小是有迹可循的。比如一个RGBA的像素，占用的内存大小为4byte。一张100x100像素的图片解压缩后占用的内存大小大约为100x100x4byte的内存（这里暂时不考虑图片信息之类的内存占用，仅举例说明）。</p>
+<p>对于一个手机应用来说，图片显示的区域不会太大。假如图片显示的区域为1000x1000pixel，显示的图片原始数据为1wx1w的图片，那这张图片的像素数量远远超过了屏幕能显示的像素数量。那大部分的像素其实是没有价值的。反而解压缩原始尺寸后的图片占用的内容是非常庞大的。</p>
+<p>于是乎就可以想到这么一个方案——在显示图片的时候根据原始图片生成一个满足显示需求的小图，这样就可以减少内存的占用。这也是现在业内使用的主流方案。</p>
+<p>在这里有一个问题，生成小图的方式是可以有效的解决之后显示图片所需要的内存。那么在生成小图这个阶段，是不是需要将原始的图片数据先读取到内存中，对原始数据解压缩，然后再生成相应的压缩图片。那在这一步中，图片读取和压缩的过程一定会带来一个内存峰值。也来到本文的一个主题，图片的解压缩存不存一种方式———边读取图片数据边生成采样率低的图片，从而保证处理过的数据的内存可以及时的释放。</p>
+<span id="more"></span>
+
+<p>这里只探索一般格式的PNG图片。</p>
+<h1 id="PNG格式图片"><a href="#PNG格式图片" class="headerlink" title="PNG格式图片"></a>PNG格式图片</h1><p>便携式网络图形是一种<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E6%97%A0%E6%8D%9F%E5%8E%8B%E7%BC%A9/2817566">无损压缩</a>的位图片形格式，其设计目的是试图替代<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/GIF">GIF</a>和<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/TIFF/2106">TIFF</a>文件格式，同时增加一些<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/GIF%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F">GIF文件格式</a>所不具备的特性。PNG使用从LZ77派生的无损数据压缩算法，一般应用于JAVA程序、<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E7%BD%91%E9%A1%B5/99347">网页</a>或S60程序中，原因是它<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E5%8E%8B%E7%BC%A9%E6%AF%94/109904">压缩比</a>高，生成文件体积小。</p>
+<h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><p>对于一个PNG文件来说，其文件头总是由位固定的字节来描述的，HEX： 89 50 4E 47 0D 0A 1A 0A。其中 50 4E 47对应的ASCII码是P N G。第一个字节0x89超出了ASCII字符的范围，这是为了避免某些软件将PNG文件当做文本文件来处理。文件中剩余的部分由多个PNG的数据块组成。一个标准的PNG文件结构应该如下：</p>
+<blockquote>
+<p>PNG文件标志 |  PNG数据块   …   PNG数据块 </p>
+</blockquote>
+<h3 id="数据块结构"><a href="#数据块结构" class="headerlink" title="数据块结构"></a>数据块结构</h3><p>PNG文中，每个数据块都由4个部分组成，如下</p>
+<table>
+<thead>
+<tr>
+<th><strong>名称</strong></th>
+<th><strong>字节数</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Length (长度)</td>
+<td>4字节</td>
+<td>指定数据块中数据域的长度，其长度不超过(231－1)字节。length的值是指chunkData的长度。</td>
+</tr>
+<tr>
+<td>Chunk Type Code (数据块类型码)</td>
+<td>4字节</td>
+<td>数据块类型码由ASCII字母(A-Z和a-z)组成</td>
+</tr>
+<tr>
+<td>Chunk Data (数据块数据)</td>
+<td>可变长度</td>
+<td>存储按照Chunk Type Code指定的数据</td>
+</tr>
+<tr>
+<td>CRC (循环冗余检测)</td>
+<td>4字节</td>
+<td>存储用来检测是否有错误的循环冗余码</td>
+</tr>
+</tbody></table>
+<h3 id="Chunk-Type"><a href="#Chunk-Type" class="headerlink" title="Chunk Type"></a>Chunk Type</h3><p>png文件中有很多种数据块，不同符号的数据块涵盖的信息不同。</p>
+<table>
+<thead>
+<tr>
+<th><strong>PNG文件格式中的数据块</strong></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>数据块符号</strong></td>
+<td><strong>数据块名称</strong></td>
+<td><strong>多数据块</strong></td>
+<td><strong>可选否</strong></td>
+<td><strong>位置限制</strong></td>
+</tr>
+<tr>
+<td>IHDR</td>
+<td>文件头数据块</td>
+<td>否</td>
+<td>否</td>
+<td>第一块</td>
+</tr>
+<tr>
+<td>cHRM</td>
+<td>基色和白色点数据块</td>
+<td>否</td>
+<td>是</td>
+<td>在PLTE和IDAT之前</td>
+</tr>
+<tr>
+<td>gAMA</td>
+<td>图像γ数据块</td>
+<td>否</td>
+<td>是</td>
+<td>在PLTE和IDAT之前</td>
+</tr>
+<tr>
+<td>sBIT</td>
+<td>样本有效位数据块</td>
+<td>否</td>
+<td>是</td>
+<td>在PLTE和IDAT之前</td>
+</tr>
+<tr>
+<td>PLTE</td>
+<td>调色板数据块</td>
+<td>否</td>
+<td>是</td>
+<td>在IDAT之前</td>
+</tr>
+<tr>
+<td>…</td>
+<td>….</td>
+<td>*</td>
+<td>*</td>
+<td>…</td>
+</tr>
+<tr>
+<td>IDAT</td>
+<td>图像数据块</td>
+<td>是</td>
+<td>否</td>
+<td>与其他IDAT连续</td>
+</tr>
+<tr>
+<td>tIME</td>
+<td>图像最后修改时间数据块</td>
+<td>否</td>
+<td>是</td>
+<td>无限制</td>
+</tr>
+<tr>
+<td>tEXt</td>
+<td>文本信息数据块</td>
+<td>是</td>
+<td>是</td>
+<td>无限制</td>
+</tr>
+<tr>
+<td>zTXt</td>
+<td>压缩文本数据块</td>
+<td>是</td>
+<td>是</td>
+<td>无限制</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>*</td>
+<td>*</td>
+<td>*</td>
+</tr>
+<tr>
+<td>IEND</td>
+<td>图像结束数据</td>
+<td>否</td>
+<td>否</td>
+<td>最后一个数据块</td>
+</tr>
+</tbody></table>
+<p><b> IHDR</b></p>
+<p>IHDR块中包含图片最基本的信息，包括宽、高、色域、压缩算法等信息。</p>
+<table>
+<thead>
+<tr>
+<th><strong>域的名称</strong></th>
+<th><strong>字节数</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Width</td>
+<td>4 bytes</td>
+<td>图像宽度，以像素为单位</td>
+</tr>
+<tr>
+<td>Height</td>
+<td>4 bytes</td>
+<td>图像高度，以像素为单位</td>
+</tr>
+<tr>
+<td>Bit depth</td>
+<td>1 byte</td>
+<td>图像深度：  索引彩色图像：1，2，4或8  灰度图像：1，2，4，8或16  真彩色图像：8或16</td>
+</tr>
+<tr>
+<td>ColorType</td>
+<td>1 byte</td>
+<td>颜色类型： 0：灰度图像, 1，2，4，8或16  2：真彩色图像，8或16  3：索引彩色图像，1，2，4或8  4：带α通道数据的灰度图像，8或16  6：带α通道数据的真彩色图像，8或16</td>
+</tr>
+<tr>
+<td>Compression method</td>
+<td>1 byte</td>
+<td>压缩方法(LZ77派生算法)</td>
+</tr>
+<tr>
+<td>Filter method</td>
+<td>1 byte</td>
+<td>滤波器方法</td>
+</tr>
+<tr>
+<td>Interlace method</td>
+<td>1 byte</td>
+<td>隔行扫描方法： 0：非隔行扫描  1： Adam7(由Adam M. Costello开发的7遍隔行扫描方法)</td>
+</tr>
+</tbody></table>
+<p><b> IDAT</b></p>
+<p>数据包存放的位置，存储实际的数据，在数据流中可以包含多个连续顺序的图像数据块。</p>
+<p><b> IEND</b></p>
+<p>表示数据段的结束。</p>
+<h2 id="PNG-Datasteam"><a href="#PNG-Datasteam" class="headerlink" title="PNG Datasteam"></a>PNG Datasteam</h2><p>IHDR块中Compression现在国际标准定义的只有0。方法0使用的LZ77算法，使用滑动窗口的deflate&#x2F;inflate算法。该算法是由计算机天才Phil Katz创造的，也是让数据压缩技术免费的人物。</p>
+<p>IDATA中的数据就是Deflate算法压缩后的zlib格式的数据。zlib的格式如下：</p>
+<table>
+<thead>
+<tr>
+<th>zlib compression method&#x2F;flags code</th>
+<th>1 byte</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Additional flags&#x2F;check bits</td>
+<td>1 byte</td>
+</tr>
+<tr>
+<td>Compressed data blocks</td>
+<td>n bytes</td>
+</tr>
+<tr>
+<td>Check value</td>
+<td>4 bytes</td>
+</tr>
+</tbody></table>
+<h5 id="compression-method-x2F-flags-code"><a href="#compression-method-x2F-flags-code" class="headerlink" title="compression method&#x2F;flags code"></a>compression method&#x2F;flags code</h5><p>其中method&#x2F;flags code值始终为8，因为国际标准的压缩算法目前只有一种。Additional flags&#x2F;check bits应该设置为0。</p>
+<h5 id="Additional-flags-x2F-check-bits"><a href="#Additional-flags-x2F-check-bits" class="headerlink" title="Additional flags&#x2F;check bits"></a>Additional flags&#x2F;check bits</h5><p>一般为0。</p>
+<h5 id="Compressed-data-blocks"><a href="#Compressed-data-blocks" class="headerlink" title="Compressed data blocks"></a>Compressed data blocks</h5><p>compressed data blocks就是压缩后的数据。</p>
+<h5 id="Check-value"><a href="#Check-value" class="headerlink" title="Check value"></a>Check value</h5><p>最后check value存在datasteam的最后面，Adler32算法计算的未压缩前的数据，来确认数据是否被损坏。block可以有多个，而且每个block的大小不可以不一样。</p>
+<h3 id="Block结构"><a href="#Block结构" class="headerlink" title="Block结构"></a>Block结构</h3><p>再把焦点聚焦到block上，每个block的开头都有3bits的头：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">first bit       BFINAL</span><br><span class="line">next <span class="number">2</span> bits     BTYPE</span><br></pre></td></tr></table></figure>
+
+<p>BFINAL表示是否是最后一个block。BTYPE的2个bits代表了数据如何压缩，有如下几种值</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">00 - no compression</span><br><span class="line">01 - compressed with fixed Huffman codes</span><br><span class="line">10 - compressed with dynamic Huffman codes</span><br><span class="line">11 - reserved (error)</span><br></pre></td></tr></table></figure>
+
+<h5 id="Non-compressed-block-BTYPE-x3D-00"><a href="#Non-compressed-block-BTYPE-x3D-00" class="headerlink" title="Non-compressed block (BTYPE&#x3D;00)"></a>Non-compressed block (BTYPE&#x3D;00)</h5><blockquote>
+<p>BTYPE所在字节的余下bit会被忽略，LEN表示数据的字节长度，NLEN是LEN的一的<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E4%B8%80%E7%9A%84%E8%A1%A5%E6%95%B0/19701457?fr=aladdin">补数</a>。之后的数据格式如下：</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  0   1   2   3   4...</span><br><span class="line">+---+---+---+---+================================+</span><br><span class="line">|  LEN  | NLEN  |... LEN bytes of literal data...|</span><br><span class="line">+---+---+---+---+================================+</span><br></pre></td></tr></table></figure>
+
+<h5 id="Compressed-with-fixed-Huffman-codes-BTYPE-x3D-01-amp-Compressed-with-dynamic-Huffman-codes-BTYPE-x3D-10"><a href="#Compressed-with-fixed-Huffman-codes-BTYPE-x3D-01-amp-Compressed-with-dynamic-Huffman-codes-BTYPE-x3D-10" class="headerlink" title="Compressed with fixed Huffman codes (BTYPE&#x3D;01) &amp; Compressed with dynamic Huffman codes (BTYPE&#x3D;10)"></a>Compressed with fixed Huffman codes (BTYPE&#x3D;01) &amp; Compressed with dynamic Huffman codes (BTYPE&#x3D;10)</h5><blockquote>
+<p>上述两中压缩方式的区别在于是静态哈夫曼编码还是动态哈夫曼编码。如果是静态哈夫曼编码，哈夫曼表不需要存储在数据中，使用时只需要查询标准的哈夫曼表即可。而动态哈夫曼表存在数据之中，由图片原始数据生成。</p>
+</blockquote>
+<p>以上3bits表示了block的相关属性，余下的数据就是真正的数据。解码数据的步骤如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">do</span><br><span class="line">   read block header from input stream.</span><br><span class="line">   if stored with no compression</span><br><span class="line">      skip any remaining bits in current partially</span><br><span class="line">         processed byte</span><br><span class="line">      read LEN and NLEN (see next section)</span><br><span class="line">      copy LEN bytes of data to output</span><br><span class="line">   otherwise</span><br><span class="line">      if compressed with dynamic Huffman codes</span><br><span class="line">         read representation of code trees (see</span><br><span class="line">            subsection below)</span><br><span class="line">      loop (until end of block code recognized)</span><br><span class="line">         decode literal/length value from input stream</span><br><span class="line">         if value &lt; 256</span><br><span class="line">            copy value (literal byte) to output stream</span><br><span class="line">         otherwise</span><br><span class="line">            if value = end of block (256)</span><br><span class="line">               break from loop</span><br><span class="line">            otherwise (value = 257..285)</span><br><span class="line">               decode distance from input stream</span><br><span class="line"></span><br><span class="line">               move backwards distance bytes in the output</span><br><span class="line">               stream, and copy length bytes from this</span><br><span class="line">               position to the output stream.</span><br><span class="line">      end loop</span><br><span class="line">while not last block</span><br></pre></td></tr></table></figure>
+
+<p>可以观察到解压数据是逐块进行的，虽然存在拷贝前部分数据的操作，但滑动窗口的大小是有限制的，也就是说超出滑动窗口的内容不会被后续解码所使用。</p>
+<p>那么对于PNG的解码就存在一种可能性，我们可以将超过滑动窗口的解码数据先行处理，然后释放掉原本的数据，保留加工后的数据，也就可以达到控制内存的峰值的作用。</p>
+<h1 id="PNG图片解码"><a href="#PNG图片解码" class="headerlink" title="PNG图片解码"></a>PNG图片解码</h1><p>通过iOS代码生成了一行纯红色1x1的图片，得到的png文件数据如下</p>
+<blockquote>
+<p>89504e47 0d0a1a0a<br>0000000d 49484452 00000001 00000001 08060000 001f15c4 89<br>00000001 73524742 00aece1ce9<br>0000000d <font color="red"> 49444154</font> <font color="blue">081d63f8 cfc0f01f 00050001 ff</font>c80f6216<br>00000000 49454e44 ae426082</p>
+</blockquote>
+<p>从hex文件中可以看到IDATA块内容的大小为13字节（蓝色标记内容）。</p>
+<blockquote>
+<p>081d<font color="blue">63f8 cfc0f01f 00</font>050001 ff</p>
+</blockquote>
+<p>compression method&#x2F;flags code：08</p>
+<p>Additional flags&#x2F;check bits：1d</p>
+<p>Check value: 050001ff</p>
+<p>Data blocks: 63f8 cfc0f01f 00</p>
+<p>对data blocks中的数据进行处理：</p>
+<blockquote>
+<p>110(final, fixed huffman code)00110 000(0x00)11111 1111(0xFF)0011 0000(0x00)0011 0000(0x00)1111 11111(0xFF)000 0000(256)0000 </p>
+</blockquote>
+<p>通过inflate算法解析可以得到原始数据如下：</p>
+<blockquote>
+<p> 0x00 0xFF 0x00 0x00 0xFF </p>
+</blockquote>
+<p>原图的过滤器为nonefilter，色域为RGBA。可以看出这是一个红色的像素点。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a target="_blank" rel="noopener" href="https://www.w3.org/TR/PNG/#figure49">W3C</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.ietf.org/rfc/rfc1950.txt">https://www.ietf.org/rfc/rfc1951.txt</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.ietf.org/rfc/rfc1951.txt">https://www.ietf.org/rfc/rfc1951.txt</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2019/06/15/iOS%E5%92%8CH5%E5%9B%BE%E7%89%87%E6%95%B0%E6%8D%AE%E4%BA%A4%E4%BA%92%E6%96%B9%E6%A1%88/" rel="prev" title="iOS和H5图片数据交互方案">
+                  <i class="fa fa-chevron-left"></i> iOS和H5图片数据交互方案
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2019/08/04/JS%E4%B8%AD%E7%9A%84Promise/" rel="next" title="Promise基础介绍">
+                  Promise基础介绍 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jin.</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
