@@ -120,7 +120,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-count">25</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -150,6 +150,183 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/20/UML%E5%9F%BA%E7%A1%80%E7%94%A8%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jin.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一只代码狗的随笔">
+      <meta itemprop="description" content="知其然知其所以然！">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 一只代码狗的随笔">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/06/20/UML%E5%9F%BA%E7%A1%80%E7%94%A8%E6%B3%95/" class="post-title-link" itemprop="url">UML基础用法</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2022-06-20 16:48:26" itemprop="dateCreated datePublished" datetime="2022-06-20T16:48:26+08:00">2022-06-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2022-07-02 16:06:12" itemprop="dateModified" datetime="2022-07-02T16:06:12+08:00">2022-07-02</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="UML基础用法"><a href="#UML基础用法" class="headerlink" title="UML基础用法"></a>UML基础用法</h1><h2 id="类关系"><a href="#类关系" class="headerlink" title="类关系"></a>类关系</h2><ol>
+<li>泛化（Generalization）<br>表现为继承</li>
+<li>实现（Realization）<br>表现为实现接口</li>
+<li>关联（Association）<br>表现为成员变量，一种强依赖的关系</li>
+<li>聚合（Aggregation）<br>一种强关联，关联关系双方是平级的，是个体和个体的关系，聚合关系双方不是平级的，是整体和部分的关系。</li>
+<li>组合（Compostion）<br>组合关系是一种强聚合的关系，组合关系与聚合关系的区别在于：聚合关系中部分离开整体仍可存活，组合关系中部分离开整体没有意义</li>
+<li>依赖（Dependency）<br>一种使用关系，依赖方可以是参数，也可以是返回值。</li>
+</ol>
+<p>各种关系的强弱顺序：泛化 &#x3D; 实现 &gt; 组合 &gt; 聚合 &gt; 关联 &gt; 依赖</p>
+<h2 id="UML"><a href="#UML" class="headerlink" title="UML"></a>UML</h2><h3 id="Defining-Relationship"><a href="#Defining-Relationship" class="headerlink" title="Defining Relationship"></a>Defining Relationship</h3><p>对应的是上述类之间的关系，UML中区分的很细致。</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&lt;|–</td>
+<td>Inheritance</td>
+</tr>
+<tr>
+<td>*–</td>
+<td>Composition</td>
+</tr>
+<tr>
+<td>o–</td>
+<td>Aggregation</td>
+</tr>
+<tr>
+<td>–&gt;</td>
+<td>Association</td>
+</tr>
+<tr>
+<td>–</td>
+<td>Link (Solid)</td>
+</tr>
+<tr>
+<td>..&gt;</td>
+<td>Dependency</td>
+</tr>
+<tr>
+<td>..|&gt;</td>
+<td>Realization</td>
+</tr>
+<tr>
+<td>..</td>
+<td>Link (Dashed)</td>
+</tr>
+</tbody></table>
+<img src="https://raw.githubusercontent.com/shiroJin/image-storage/master/UML_class_relation.png">
+
+<h3 id="Defining-a-class"><a href="#Defining-a-class" class="headerlink" title="Defining a class"></a>Defining a class</h3><p>UML中使用框形式表示一个类。如下：</p>
+<img src="https://raw.githubusercontent.com/shiroJin/image-storage/master/UML_example1.png">
+
+<ul>
+<li><p>第一格表示类&#x2F;接口名称<br>名称，声明的是接口则标注关键字*&lt;<interface>&gt;<em>, 抽象类标注</em>&lt;<abstract>&gt;*，枚举类型&lt;<enumeration>&gt;，service class&lt;<service>&gt;</p>
+</li>
+<li><p>第二格表示声明的成员变量<br>第一个字符表示属性，例如公开，私有。随后是成员类型，最后是名称</p>
+</li>
+<li><p>第三格表示声明的方法<br>方法和成员相似，不同的是有个括号，括号内是参数名称。成员类型字段表示returnType。当没有返回值时returntype可以省略。</p>
+</li>
+</ul>
+<h3 id="Defining-member-of-a-class"><a href="#Defining-member-of-a-class" class="headerlink" title="Defining member of a class"></a>Defining member of a class</h3><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Examples</th>
+<th>keyword</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Public</td>
+<td>+String owner<br />+String foo()</td>
+<td>+</td>
+</tr>
+<tr>
+<td>Private</td>
+<td>-String owner<br />-String foo()</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Protect</td>
+<td>#String owner<br />#foo()</td>
+<td>#</td>
+</tr>
+<tr>
+<td>Package&#x2F;internal</td>
+<td><del>String owner<br /></del>foo()</td>
+<td>~</td>
+</tr>
+<tr>
+<td>Static</td>
+<td><u>+String owner</u><br /><u>+foo()</u></td>
+<td>underline（下划线）</td>
+</tr>
+<tr>
+<td>Abstract</td>
+<td><em>+foo()</em></td>
+<td>italic（斜体）</td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1549,82 +1726,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/01/22/C%E7%A8%8B%E5%BA%8F%E6%98%AF%E5%A6%82%E4%BD%95%E5%90%AF%E5%8A%A8%E7%9A%84/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2019/10/07/%E4%BA%86%E8%A7%A3xcodeproj/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Jin.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="一只代码狗的随笔">
-      <meta itemprop="description" content="知其然知其所以然！">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 一只代码狗的随笔">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2019/10/07/%E4%BA%86%E8%A7%A3xcodeproj/" class="post-title-link" itemprop="url">了解xcodeproj</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-
-      <time title="Created: 2019-10-07 23:12:00" itemprop="dateCreated datePublished" datetime="2019-10-07T23:12:00+08:00">2019-10-07</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>​	在工作中遇到一个需求，比较两个target的不同——编译资源和资源文件的不同。我们都知道.m文件会参与编译；xib，assets文件会作为包的资源文件。头文件在预处理时使用。那xcode是如何组织这些内容的。本文的主角xcodeproj做了这些。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/10/07/%E4%BA%86%E8%A7%A3xcodeproj/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
